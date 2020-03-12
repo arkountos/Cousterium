@@ -1,5 +1,5 @@
-
-import blockchain
+# Should import blockchain?
+# import blockchain
 
 
 
@@ -13,10 +13,13 @@ class Block:
 		#self.hash
 		#self.nonce
 		#self.listOfTransactions
+		pass
 	
-	def myHash:
+	def myHash():
 		#calculate self.hash
+		pass
 
 
-	def add_transaction(transaction transaction, blockchain blockchain):
+	def add_transaction(transaction, blockchain):
 		#add a transaction to the block
+		pass

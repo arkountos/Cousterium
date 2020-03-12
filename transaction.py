@@ -22,11 +22,19 @@ class Transaction:
 
 
         #self.sender_address: To public key του wallet από το οποίο προέρχονται τα χρήματα
+        self.sender_address = sender_address
+
         #self.receiver_address: To public key του wallet στο οποίο θα καταλήξουν τα χρήματα
+        self.recipient_address = recipient_address
+
         #self.amount: το ποσό που θα μεταφερθεί
+        self.amount = 
         #self.transaction_id: το hash του transaction
+        
         #self.transaction_inputs: λίστα από Transaction Input 
+
         #self.transaction_outputs: λίστα από Transaction Output 
+        
         #selfSignature
 
 
