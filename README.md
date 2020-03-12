@@ -7,15 +7,15 @@ Deadlines:
 
 ***1st: 15/3***
 
-Iliadis: transaction.py
+Iliadis: node.py
 
 Koustas: wallet.py
 
-Peppas: block.py
-
-
+ Peppas: block.py
 
 ***2nd: 22/3***
+
+transaction.py
 
 ***Final: 27/3***
 
