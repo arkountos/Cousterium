@@ -24,7 +24,7 @@ class Block:
 		return (sha256(block_string.encode()).hexdigest())
 
 	def add_transaction(transaction, blockchain):
-		if len.(listOfTransactions) < capacity:
+		if len(listOfTransactions) < capacity:
 			self.listOfTransactions.append(transaction)
 		pass
 
