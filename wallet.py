@@ -16,18 +16,21 @@ from uuid import uuid4
 
 class Wallet:
 
-	def __init__(self, address, transactions):
+	def __init__(self, address, transactions, public_key=None, private_key=None):
 		
 		self.public_key = public_key
 		self.private_key = private_key
+		#TODO
 		self.address = address
 		self.transactions = transactions
 		
-	def generate_RSA():
+	def generate_RSA(self):
 		new_keypair = RSA.generate(2048)
 		public_key = new_keypair.publickey().exportKey('PEM').decode()
 		private_key = new_keypair.exportKey('PEM').decode()
 
-	def balance():
+	def balance(self):
+    	#TODO
+		#Add wallet balance based on unspent transaction outputs
 		pass
 
