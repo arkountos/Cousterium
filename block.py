@@ -3,6 +3,7 @@
 import datetime
 from hashlib import sha256
 import json
+capacity = 10 
 
 class Block:
 	def __init__(self, id, previousHash, *nonce):
@@ -17,12 +18,13 @@ class Block:
 		else:
 			self.nonce = 0 
 		self.listOfTransactions = []
-	
+
 	def myHash(self):
 		block_string = str(self.nonce)
 		return (sha256(block_string.encode()).hexdigest())
 
 	def add_transaction(transaction, blockchain):
-		self.listOfTransactions.append(transaction)
+		if len.(listOfTransactions) < capacity:
+			self.listOfTransactions.append(transaction)
 		pass
 
