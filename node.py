@@ -1,24 +1,25 @@
 import block
 import wallet
 
-class node:
+class Node:
 
 	# FIVOS
 	# Only one node is running on each VM. Each node only has one wallet.
 
-	def __init__(self, node_id, ):
+	def __init__(self, node_id, address):
 		##set
 
 		self.chain
 
 		self.current_id_count = node_id
 
-		self.NBC=100
+		self.NBC
 		
 		#self.wallet
-		self.wallet = create_wallet()
+		self.wallet = create_wallet(self)
+		self.address = address # Address is a string
 
-		#slef.ring[]   #here we store information for every node, as its id, its address (ip:port) its public key and its balance 
+		self.ring   #here we store information for every node, as its id, its address (ip:port) its public key and its balance 
 
 
 
@@ -26,9 +27,9 @@ class node:
 	def create_new_block():
 		pass
 
-	def create_wallet():
+	def create_wallet(self):
 		#create a wallet for this node, with a public key and a private key
-		return wallet.Wallet() # TODO Add constructor fields
+		return wallet.Wallet(self.address) # TODO Add constructor fields
 
 	def register_node_to_ring():
 		#add this node to the ring, only the bootstrap node can add a node to the ring after checking his wallet and ip:port address
