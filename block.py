@@ -5,7 +5,7 @@ from hashlib import sha256
 import json
 
 class Block:
-	def __init__(self, id, previousHash, transactions, *nonce):
+	def __init__(self, id, previousHash, *nonce):
 		##set
 		
 		self.id = id
@@ -17,13 +17,12 @@ class Block:
 		else:
 			self.nonce = 0 
 		self.listOfTransactions = []
-		self.listOfTransactions.append(transactions)
 	
 	def myHash(self):
 		block_string = str(self.nonce)
 		return (sha256(block_string.encode()).hexdigest())
 
 	def add_transaction(transaction, blockchain):
-		#add a transaction to the block
+		self.listOfTransactions.append(transaction)
 		pass
 
