@@ -16,7 +16,7 @@ from uuid import uuid4
 
 class Wallet:
 
-	def __init__(self, public_key=None, private_key=None, address, transactions):
+	def __init__(self, address, transactions):
 		
 		self.public_key = public_key
 		self.private_key = private_key
