@@ -1,7 +1,7 @@
 # Should import blockchain?
 # import blockchain
 import datetime
-from haslib import sha256
+from hashlib import sha256
 import json
 
 
