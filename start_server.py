@@ -10,7 +10,7 @@ import json
 app = Flask(__name__)
 
 # This node private IP Address
-MY_ADDRESS = '192.168.0.2'
+MY_ADDRESS = '127.0.0.1'
 
 # Number of nodes in network
 NETWORK_SIZE = 5
@@ -40,6 +40,8 @@ def test():
     return('Address: ' + json.dumps(MY_ADDRESS))
 
 
+
+
 if __name__ == '__main__':
     from argparse import ArgumentParser
 
@@ -49,4 +51,4 @@ if __name__ == '__main__':
     port = args.port
     setup_bootstrap_node()
 
-    app.run(host='127.0.0.1', port=port)
+    app.run(host=MY_ADDRESS, port=port) # TODO: This will change depending on the VM we run it
