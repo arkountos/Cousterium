@@ -15,6 +15,9 @@ MY_ADDRESS = '127.0.0.1'
 # Number of nodes in network
 NETWORK_SIZE = 5
 
+#IDs
+NODE_IDS = [4, 3, 2, 1]
+
 # IP addresses of all nodes in ring
 ADDRESS_BOOK = [MY_ADDRESS]
 
@@ -38,6 +41,17 @@ def setup_bootstrap_node():
 def test():
     print('Address: ' + json.dumps(MY_ADDRESS))
     return('Address: ' + json.dumps(MY_ADDRESS))
+
+# Add the calling node to the ring
+# 1) Send back an id
+# 2) Add the node to the ring
+@app.route('/add_to_ring', methods=['POST'])
+def add_to_ring():
+    next_id = NODE_IDS.pop()
+    print("Got it")
+    print(request.form.to_dict()) 
+    return{'request data': request.data}
+    
 
 
 

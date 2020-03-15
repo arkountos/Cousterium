@@ -23,8 +23,8 @@ def setup_regular_node():
 
     # Our node sends it's publik key (= wallet address = MY_ADDRESS ? )
     # and receives a unique id (0..NETWORK_SIZE) 
-    print('http://' + SERVER_ADDRESS + ':5000/test')
-    r = requests.get('http://' + SERVER_ADDRESS + ':5000/test', )
+    print('http://' + SERVER_ADDRESS + ':5000/add_to_ring')
+    r = requests.post('http://' + SERVER_ADDRESS + ':5000/add_to_ring', data = {'public_key':MY_ADDRESS})
     print(r)
 
 setup_regular_node()
