@@ -7,36 +7,31 @@ import transaction
 
 app = Flask(__name__)
 
-# If you hit that you are setting up yourself to be the bootstrap node
-@app.route('/setup/bootstrap', methods=['GET'])
-def setup_bootstrap_node():
-    # This node private IP Address
-    MY_ADDRESS = '192.168.0.2'
+# # If you hit that you are setting up yourself to be the bootstrap node
+# @app.route('/setup/bootstrap', methods=['GET'])
+# def setup_bootstrap_node():
+#     # This node private IP Address
+#     MY_ADDRESS = '192.168.0.2'
 
-    # Number of nodes in network
-    NETWORK_SIZE = 5
+#     # Number of nodes in network
+#     NETWORK_SIZE = 5
 
-    # Create the very first node
-    # The node constructor also creates the Wallet() we need and binds it to the node (I hope)
-    myNode = node.Node(0, MY_ADDRESS)
-    print(myNode)
+#     # Create the very first node
+#     # The node constructor also creates the Wallet() we need and binds it to the node (I hope)
+#     myNode = node.Node(0, MY_ADDRESS)
+#     print(myNode)
 
-    # Create the genesis block with id = 0 and prev_hash = -1
-    genesis_block = block.Block(0, -1)
+#     # Create the genesis block with id = 0 and prev_hash = -1
+#     genesis_block = block.Block(0, -1)
 
-    # Need to add the first and only transaction to the genesis block
-    first_transaction = transaction.Transaction(0, MY_ADDRESS, NETWORK_SIZE * 100)
-    genesis_block.add_transaction(first_transaction)
+#     # Need to add the first and only transaction to the genesis block
+#     first_transaction = transaction.Transaction(0, MY_ADDRESS, NETWORK_SIZE * 100)
+#     genesis_block.add_transaction(first_transaction)
 
-    # Add the first block to the node's blockchain
-    myNode.chain.append(genesis_block)
+#     # Add the first block to the node's blockchain
+#     myNode.chain.append(genesis_block)
 
-# If you hit that you set yourself up to be a regular Cousterium User node
-@app.route('/setup/regular', methods=['GET'])
-def setup_regular_node():
-    # YOU NEED TO TALK TO THE BOOTSTRAP NODE TO GET 
-    # YOUR ID AND WALLET ADDRESS
-    pass
+
 
 
 
