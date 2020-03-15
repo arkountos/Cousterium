@@ -21,6 +21,9 @@ NODE_IDS = [4, 3, 2, 1]
 # IP addresses of all nodes in ring
 ADDRESS_BOOK = [MY_ADDRESS]
 
+# Node on this VM
+MY_NODE = setup_bootstrap_node()
+
 def setup_bootstrap_node():
     # Create the very first node
     # The node constructor also creates the Wallet() we need and binds it to the node (I hope)
@@ -37,20 +40,26 @@ def setup_bootstrap_node():
     # Add the first block to the node's blockchain
     myNode.chain.append(genesis_block)
 
+    # Return the node
+    return (myNode)
+
 @app.route('/test')
 def test():
     print('Address: ' + json.dumps(MY_ADDRESS))
     return('Address: ' + json.dumps(MY_ADDRESS))
 
 # Add the calling node to the ring
-# 1) Send back an id
-# 2) Add the node to the ring
+# 1) Add the node to the ring
+# 2) Send back an id
 @app.route('/add_to_ring', methods=['POST'])
 def add_to_ring():
     next_id = NODE_IDS.pop()
     print("Got it")
-    print(request.form.to_dict()) 
-    return{'request data': request.data}
+    print(request.form.to_dict())
+    # 1)
+    
+    # 2)
+    return (next_id)
     
 
 

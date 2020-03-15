@@ -26,5 +26,6 @@ def setup_regular_node():
     print('http://' + SERVER_ADDRESS + ':5000/add_to_ring')
     r = requests.post('http://' + SERVER_ADDRESS + ':5000/add_to_ring', data = {'public_key':MY_ADDRESS})
     print(r)
+    print(r.text)
 
 setup_regular_node()
