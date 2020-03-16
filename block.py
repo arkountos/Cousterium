@@ -8,16 +8,13 @@ capacity = 10
 class Block:
 	def __init__(self, id, previousHash, current_hash, listOfTransactions, nonce=0):
 		##set
-		
+		# nonce = 0 only if we dont give any argument 
 		self.id = id
 		self.previousHash = previousHash
 		self.timestamp = datetime.datetime.utcnow()
 		self.current_hash == current_hash   
 		self.nonce = nonce 
 		self.listOfTransactions = []
-
-	def dump(self):
-		return json.dumps(dict(transactions=self.transactions,nonce=self.nonce,timestamp=self.timestamp), sort_keys=True)
 
 	def myHash(self):
 		return (sha256.new(self.dump().encode()).hexdigest())
@@ -26,3 +23,8 @@ class Block:
 		if len(self.listOfTransactions) < capacity:
 			self.listOfTransactions.append(transaction)
 		pass
+
+	def dump(self):
+		# Structure with trans, nonce, timestamp to use them in calculation of hash
+		return json.dumps(dict(transactions=self.transactions,nonce=self.nonce,timestamp=self.timestamp), sort_keys=True)
+
