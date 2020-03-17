@@ -29,8 +29,10 @@ class Wallet:
 		public_key = new_keypair.publickey().exportKey('PEM').decode()
 		private_key = new_keypair.exportKey('PEM').decode()
 
-	def balance(self):
-    	#TODO
-		#Add wallet balance based on unspent transaction outputs
-		pass
+	def balance(self, UTXOS):
+    	# just a prototype. UTXOS is the list of all uspent transactions
+		balance = 0 
+		for i in UTXOS:
+			balance += i 
+		return balance
 
