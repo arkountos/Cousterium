@@ -20,7 +20,6 @@ class Wallet:
 		
 		self.public_key = public_key
 		self.private_key = private_key
-		#TODO
 		self.address = address
 		self.transactions = transactions
 		
@@ -35,4 +34,13 @@ class Wallet:
 		for i in UTXOS:
 			balance += i 
 		return balance
+'''
+class UTXOs:
 
+	def __init__(self, transactions)
+'''
+
+
+
+m = Wallet(1,[])
+m.generate_RSA()
