@@ -81,10 +81,11 @@ else:
 @app.route('/add_to_ring', methods=['POST'])
 def add_to_ring():
     next_id = NODE_IDS.pop()
-    print("Got it")
+    print("Start of request")
     print(request.form.to_dict())
+    print("End of request")
     # 1)
-    MY_NODE.chain.append()
+    MY_NODE.ring.append(
     # 2)
     return (next_id)
 
