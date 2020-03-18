@@ -34,6 +34,9 @@ class Wallet:
 		for i in UTXOS:
 			balance += i 
 		return balance
+
+	def get_private_key(self):
+		return self.private_key
 '''
 class UTXOs:
 

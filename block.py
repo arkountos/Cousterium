@@ -12,7 +12,7 @@ class Block:
 		self.id = id
 		self.previousHash = previousHash
 		self.timestamp = datetime.datetime.utcnow()
-		self.current_hash == current_hash   
+		self.current_hash = current_hash   
 		self.nonce = nonce 
 		self.listOfTransactions = []
 
