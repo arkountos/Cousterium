@@ -37,6 +37,9 @@ class Wallet:
 
 	def get_private_key(self):
 		return self.private_key
+
+	def get_public_key(self):
+		return self.public_key
 '''
 class UTXOs:
 
