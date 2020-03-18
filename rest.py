@@ -7,6 +7,7 @@ import transaction
 import socket
 import json
 import requests
+import netifaces
 
 # Setup the bootstrap node
 def setup_bootstrap_node():
@@ -16,10 +17,10 @@ def setup_bootstrap_node():
     print(myNode)
 
     # Create the genesis block with id = 0 and prev_hash = -1
-    genesis_block = block.Block(0, -1, []) # TODO: we shouldn't have to pass emtpy list as listOfTransactions in constructor, see with peppas
+    genesis_block = block.Block(0, -1, [], []) # TODO: we shouldn't have to pass emtpy list as listOfTransactions in constructor, see with peppas
 
     # Need to add the first and only transaction to the genesis block
-    first_transaction = transaction.Transaction(0, MY_ADDRESS, NETWORK_SIZE * 100)
+    first_transaction = transaction.Transaction( sender_address=0, sender_private_key=myNode.wallet.get_private_key(), recipient_address=MY_ADDRESS, value=NETWORK_SIZE * 100, transaction_inputs=[])
     genesis_block.add_transaction(first_transaction)
 
     # Add the first block to the node's blockchain
@@ -36,27 +37,27 @@ def setup_regular_node():
 
     # Our node sends it's publik key (= wallet address = MY_ADDRESS ? )
     # and receives a unique id (0..NETWORK_SIZE) 
-    print('http://' + SERVER_ADDRESS + ':5000/add_to_ring')
-    r = requests.post('http://' + SERVER_ADDRESS + ':5000/add_to_ring', data = {'public_key':MY_ADDRESS})
+    print('http://' + SERVER_ADDRESS + ':5000/test')
+    r = requests.post('http://' + SERVER_ADDRESS + ':5000/test', data = {'public_key':MY_ADDRESS})
     print(r)
     print(r.text)
 
 # A function to get the VM's private IP (e.g. 192.168.0.4)
 def get_my_ip():
     """
-    Find my IP address
+    Find my private IP address
     :return:
     """
-    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    s.connect(("1.1.1.1", 80))
-    ip = s.getsockname()[0]
-    s.close()
-    return ip
+    iface = netifaces.ifaddresses('eth1').get(netifaces.AF_INET)
+    result = iface[0]["addr"]
+    print(result)
+    return(result)
 
 app = Flask(__name__)
 
 #### IF BOOTSTRAP NODE ####
 if (get_my_ip() == '192.168.0.2'):
+    print("I'm gonna be the bootstrap!!!")
     MY_ADDRESS = '192.168.0.2'
     # Number of nodes in network
     NETWORK_SIZE = 5
@@ -67,6 +68,7 @@ if (get_my_ip() == '192.168.0.2'):
     MY_NODE = setup_bootstrap_node()
 #### IF REGULAR NODE ####
 else:
+    print("I'm gonna be a client :(")
     MY_ADDRESS = get_my_ip()
     # Bootstrap node address (we suppose it is known to everyone)
     SERVER_ADDRESS = '192.168.0.2'
@@ -111,4 +113,4 @@ if __name__ == '__main__':
     args = parser.parse_args()
     port = args.port
 
-    app.run(host='127.0.0.1', port=port)
+    app.run(host=MY_ADDRESS, port=port)
