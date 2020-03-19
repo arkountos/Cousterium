@@ -9,7 +9,7 @@ class Blockchain:
         self.chain = []
 
     def create_genesis_block(self):
-        genesis_block = Block[0,1,'placeholder',[]]
+        genesis_block = Block(0,1,'placeholder',[])
         genesis_block.current_hash = genesis_block.myHash()
         self.chain.append(genesis_block)
         
