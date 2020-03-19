@@ -33,18 +33,20 @@ def setup_bootstrap_node():
 
 # Setup a regular participant node
 def setup_regular_node():
+    # Create node and associate with VM via address
+    myNode = node.Node(MY_ADDRESS)
 
     # Our node sends it's publik key (= wallet address = MY_ADDRESS ? )
     # and receives a unique id (0..NETWORK_SIZE) 
     print('http://' + SERVER_ADDRESS + ':5000/add_to_ring')
-    r = requests.post('http://' + SERVER_ADDRESS + ':5000/add_to_ring', data = {'public_key':MY_ADDRESS})
+    r = requests.post('http://' + SERVER_ADDRESS + ':5000/add_to_ring', data = {'public_key':MY_NODE.wallet.get_public_key()})
     print("The answer from the server is: \nr: ")
     print(r)
     print("\nr.text ")
     print(r.text)
-    # Create node and associate with VM via address
-    myNode = node.Node(int(r.text), MY_ADDRESS)
-    print(myNode)
+    # Set node id to the id you got on the response
+    myNode.set_id(r.text)
+    
 
 # A function to get the VM's private IP (e.g. 192.168.0.4)
 def get_my_ip():
@@ -61,7 +63,8 @@ def get_my_ip():
 # when every node joins the system.
 # This is only run from the bootstrap node
 def broadcast_info():
-    for node_info in MY_NODE.ring:
+    print("RING: ")
+    print(MY_NODE.ring)
 
 
 
@@ -78,8 +81,8 @@ if (get_my_ip() == '192.168.0.2'):
     #IDs
     NODE_IDS = [5, 4, 3, 2]
     # IP addresses of all nodes in ring
-    ADDRESS_BOOK = [MY_ADDRESS]
     MY_NODE = setup_bootstrap_node()
+    #ADDRESS_BOOK = [{MY_ADDRESS:MY_NODE.wallet.get_public_key()}]
 #### IF REGULAR NODE ####
 else:
     print("I'm gonna be a client :(")
@@ -99,9 +102,12 @@ def add_to_ring():
     print("Start of request")
     print(request.form.to_dict())
     print("End of request")
+    # request.form.to_dict() is
+    # {'public_key':'gawhretsyrjesshr3546uet'}    
+    
     # 1)
-
-    MY_NODE.ring.append(request.form.to_dict())
+    print("We are appending ", {'ip':request.remote_addr, 'public_key':request.form.to_dict()['public_key']})
+    MY_NODE.ring.append({'ip':request.remote_addr, 'public_key':request.form.to_dict()['public_key']})
     # Instead we can do
     # MY_NODE.register_node_to_ring(next_id, request.form.to_dict()[1])
 

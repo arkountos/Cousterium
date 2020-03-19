@@ -6,7 +6,7 @@ class Node:
 	# FIVOS
 	# Only one node is running on each VM. Each node only has one wallet.
 
-	def __init__(self, node_id, address, chain=[], NBC=0, ring=[]):
+	def __init__(self, address, node_id=0, chain=[], NBC=0, ring=[]):
 		##set
 
 		self.chain = chain
@@ -17,7 +17,8 @@ class Node:
 		self.ring = ring  #here we store information for every node, as its id, its address (ip:port) its public key and its balance 
 
 
-
+	def set_id(self, id):
+		self.id = id
 
 	def create_new_block():
 		pass
