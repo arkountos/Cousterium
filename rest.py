@@ -20,6 +20,8 @@ def setup_bootstrap_node():
     genesis_block = block.Block(0, -1, [], []) # TODO: we shouldn't have to pass emtpy list as listOfTransactions in constructor, see with peppas
 
     # Need to add the first and only transaction to the genesis block
+    print("The bootstrap node's wallet private key is ")
+    print(myNode.wallet.get_private_key())
     first_transaction = transaction.Transaction( sender_address=0, sender_private_key=myNode.wallet.get_private_key(), recipient_address=MY_ADDRESS, value=NETWORK_SIZE * 100, transaction_inputs=[])
     genesis_block.add_transaction(first_transaction)
 
@@ -55,6 +57,16 @@ def get_my_ip():
     print(result)
     return(result)
 
+# A function to broadcast the ring information to all the nodes,
+# when every node joins the system.
+# This is only run from the bootstrap node
+def broadcast_info():
+    for node_info in MY_NODE.ring:
+
+
+
+
+
 app = Flask(__name__)
 
 #### IF BOOTSTRAP NODE ####
@@ -83,19 +95,24 @@ else:
 @app.route('/add_to_ring', methods=['POST'])
 def add_to_ring():
     next_id = NODE_IDS.pop()
+    
     print("Start of request")
     print(request.form.to_dict())
     print("End of request")
     # 1)
+
     MY_NODE.ring.append(request.form.to_dict())
+    # Instead we can do
+    # MY_NODE.register_node_to_ring(next_id, request.form.to_dict()[1])
+
     print("MY_NODE contains:")
     print(MY_NODE.ring)
     # 2)
 
     if (next_id == 5):
 	### YOU SHOULD BROADCAST THE LIST NOW
-	### myNode.broadcast()
-        pass
+        broadcast_info()
+    
 
     return (str(next_id))
 

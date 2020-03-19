@@ -26,10 +26,10 @@ class Node:
 		#create a wallet for this node, with a public key and a private key
 		return wallet.Wallet(self.address, []) # TODO Add constructor fields
 
-	def register_node_to_ring():
+	def register_node_to_ring(self, id, public_key):
 		#add this node to the ring, only the bootstrap node can add a node to the ring after checking his wallet and ip:port address
 		#bottstrap node informs all other nodes and gives the request node an id and 100 NBCs
-		pass
+		self.ring.append({id: public_key})
 
 
 	def create_transaction(sender, receiver, signature):
