@@ -31,16 +31,18 @@ def setup_bootstrap_node():
 
 # Setup a regular participant node
 def setup_regular_node():
-    # Create node and associate with VM via address
-    myNode = node.Node(0, MY_ADDRESS)
-    print(myNode)
 
     # Our node sends it's publik key (= wallet address = MY_ADDRESS ? )
     # and receives a unique id (0..NETWORK_SIZE) 
-    print('http://' + SERVER_ADDRESS + ':5000/test')
-    r = requests.post('http://' + SERVER_ADDRESS + ':5000/test', data = {'public_key':MY_ADDRESS})
+    print('http://' + SERVER_ADDRESS + ':5000/add_to_ring')
+    r = requests.post('http://' + SERVER_ADDRESS + ':5000/add_to_ring', data = {'public_key':MY_ADDRESS})
+    print("The answer from the server is: \nr: ")
     print(r)
+    print("\nr.text ")
     print(r.text)
+    # Create node and associate with VM via address
+    myNode = node.Node(int(r.text), MY_ADDRESS)
+    print(myNode)
 
 # A function to get the VM's private IP (e.g. 192.168.0.4)
 def get_my_ip():
@@ -62,7 +64,7 @@ if (get_my_ip() == '192.168.0.2'):
     # Number of nodes in network
     NETWORK_SIZE = 5
     #IDs
-    NODE_IDS = [4, 3, 2, 1]
+    NODE_IDS = [5, 4, 3, 2]
     # IP addresses of all nodes in ring
     ADDRESS_BOOK = [MY_ADDRESS]
     MY_NODE = setup_bootstrap_node()
@@ -85,9 +87,17 @@ def add_to_ring():
     print(request.form.to_dict())
     print("End of request")
     # 1)
-    MY_NODE.ring.append(
+    MY_NODE.ring.append(request.form.to_dict())
+    print("MY_NODE contains:")
+    print(MY_NODE.ring)
     # 2)
-    return (next_id)
+
+    if (next_id == 5):
+	### YOU SHOULD BROADCAST THE LIST NOW
+	### myNode.broadcast()
+        pass
+
+    return (str(next_id))
 
 @app.route('/test')
 def test():

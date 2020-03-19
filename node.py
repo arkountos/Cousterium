@@ -10,7 +10,7 @@ class Node:
 		##set
 
 		self.chain = chain
-		self.current_id_count = node_id
+		self.id = node_id
 		self.NBC = NBC		
 		self.address = address # Address is a string
 		self.wallet = self.create_wallet()
