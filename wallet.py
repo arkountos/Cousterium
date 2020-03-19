@@ -48,8 +48,3 @@ class UTXOs:
 
 	def __init__(self, transactions)
 '''
-
-
-
-m = Wallet(1,[])
-m.generate_RSA()
