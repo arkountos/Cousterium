@@ -39,7 +39,7 @@ def setup_regular_node():
     # Our node sends it's publik key (= wallet address = MY_ADDRESS ? )
     # and receives a unique id (0..NETWORK_SIZE) 
     print('http://' + SERVER_ADDRESS + ':5000/add_to_ring')
-    r = requests.post('http://' + SERVER_ADDRESS + ':5000/add_to_ring', data = {'public_key':MY_NODE.wallet.get_public_key()})
+    r = requests.post('http://' + SERVER_ADDRESS + ':5000/add_to_ring', data = {'public_key':myNode.wallet.get_public_key()})
     print("The answer from the server is: \nr: ")
     print(r)
     print("\nr.text ")
@@ -107,7 +107,7 @@ def add_to_ring():
     
     # 1)
     print("We are appending ", {'ip':request.remote_addr, 'public_key':request.form.to_dict()['public_key']})
-    MY_NODE.ring.append({'ip':request.remote_addr, 'public_key':request.form.to_dict()['public_key']})
+    MY_NODE.ring.append({'id': next_id, 'ip':request.remote_addr, 'public_key':request.form.to_dict()['public_key']})
     # Instead we can do
     # MY_NODE.register_node_to_ring(next_id, request.form.to_dict()[1])
 
@@ -115,9 +115,9 @@ def add_to_ring():
     print(MY_NODE.ring)
     # 2)
 
-    if (next_id == 5):
+    #if (next_id == 5):
 	### YOU SHOULD BROADCAST THE LIST NOW
-        broadcast_info()
+    broadcast_info()
     
 
     return (str(next_id))
