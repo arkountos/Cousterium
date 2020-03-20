@@ -22,7 +22,7 @@ def setup_bootstrap_node():
     # Need to add the first and only transaction to the genesis block
     print("The bootstrap node's wallet private key is ")
     print(myNode.wallet.get_private_key())
-    first_transaction = transaction.Transaction( sender_address=0, recipient_address=MY_ADDRESS, value=NETWORK_SIZE * 100, transaction_inputs=[])
+    first_transaction = transaction.Transaction( sender=0, recipient=MY_ADDRESS, amount=NETWORK_SIZE * 100, inputs=[])
     genesis_block.add_transaction(first_transaction)
 
     # Add the first block to the node's blockchain
