@@ -46,6 +46,8 @@ def setup_regular_node():
     print(r.text)
     # Set node id to the id you got on the response
     myNode.set_id(r.text)
+    #print("MY_NODE IS: ", myNode)
+    return(myNode)
     
 
 # A function to get the VM's private IP (e.g. 192.168.0.4)
@@ -66,12 +68,12 @@ def broadcast_info():
     print("RING: ")
     print(MY_NODE.ring)
     print("Trying to print the first ip:")
-    print(MY_NODE.ring[0]['ip'])
+    #print(MY_NODE.ring[0]['ip'])
     for data_line in MY_NODE.ring:
-        print("data_line is ", data_line)
-        print("data_line['ip'] is ", data_line['ip'])
-
-        # r = requests.post("http://" + data_line['ip'] + ":5000/add_to_client_ring", data={'id':})
+        #print("data_line is ", data_line)
+        #print("data_line['ip'] is ", data_line['ip'])
+        print("BROADCASTING TO: " +  "http://" + data_line['ip'] + ":5000/add_to_client_ring")
+        r = requests.post("http://" + data_line['ip'] + ":5000/add_to_client_ring", data=data_line)
 
 
 
@@ -99,7 +101,11 @@ else:
 
 @app.route('/add_to_client_ring', methods=['POST'])
 def add_to_client_ring():
-    MY_NODE.ring.append({'id':request.form.to_dict()['id'], 'ip':request.remote_addr,'public_key':request.form.to_dict()['public_key']})
+    print("This has to be a dict")
+    print(request.form.to_dict())
+    MY_NODE.ring.append(request.form.to_dict())
+
+    return("OK!")
 
 
 # Add the calling node to the ring
@@ -109,20 +115,20 @@ def add_to_client_ring():
 def add_to_ring():
     next_id = NODE_IDS.pop()
     
-    print("Start of request")
-    print(request.form.to_dict())
-    print("End of request")
+    #print("Start of request")
+    #print(request.form.to_dict())
+    #print("End of request")
     # request.form.to_dict() is
     # {'public_key':'gawhretsyrjesshr3546uet'}    
     
     # 1)
-    print("We are appending ", {'ip':request.remote_addr, 'public_key':request.form.to_dict()['public_key']})
+    #print("We are appending ", {'ip':request.remote_addr, 'public_key':request.form.to_dict()['public_key']})
     MY_NODE.ring.append({'id': next_id, 'ip':request.remote_addr, 'public_key':request.form.to_dict()['public_key']})
     # Instead we can do
     # MY_NODE.register_node_to_ring(next_id, request.form.to_dict()[1])
 
-    print("MY_NODE contains:")
-    print(MY_NODE.ring)
+    #print("MY_NODE contains:")
+    #print(MY_NODE.ring)
     # 2)
 
     if (next_id == 3):
@@ -157,5 +163,5 @@ if __name__ == '__main__':
     parser.add_argument('-p', '--port', default=5000, type=int, help='port to listen on')
     args = parser.parse_args()
     port = args.port
-
+    print("Serving at: ", MY_ADDRESS)
     app.run(host=MY_ADDRESS, port=port)
