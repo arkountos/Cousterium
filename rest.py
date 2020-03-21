@@ -34,7 +34,7 @@ def setup_bootstrap_node():
 # Setup a regular participant node
 def setup_regular_node():
     # Create node and associate with VM via address
-    myNode = node.Node(MY_ADDRESS)
+    myNode = node.Node(0, MY_ADDRESS)
 
     # Our node sends it's publik key (= wallet address = MY_ADDRESS ? )
     # and receives a unique id (0..NETWORK_SIZE) 
@@ -47,6 +47,8 @@ def setup_regular_node():
     # Set node id to the id you got on the response
     myNode.set_id(r.text)
     #print("MY_NODE IS: ", myNode)
+    print("I RETURN: ")
+    print((myNode is None))
     return(myNode)
     
 
@@ -67,13 +69,8 @@ def get_my_ip():
 def broadcast_info():
     print("RING: ")
     print(MY_NODE.ring)
-    print("Trying to print the first ip:")
-    #print(MY_NODE.ring[0]['ip'])
-    for data_line in MY_NODE.ring:
-        #print("data_line is ", data_line)
-        #print("data_line['ip'] is ", data_line['ip'])
-        print("BROADCASTING TO: " +  "http://" + data_line['ip'] + ":5000/add_to_client_ring")
-        r = requests.post("http://" + data_line['ip'] + ":5000/add_to_client_ring", data=data_line)
+    #print("BROADCASTING TO: " +  "http://" + data_line['ip'] + ":5000/test")
+    r = requests.get("http://192.168.0.3:5000/test")
 
 
 
@@ -83,7 +80,7 @@ app = Flask(__name__)
 #### IF BOOTSTRAP NODE ####
 if (get_my_ip() == '192.168.0.2'):
     print("I'm gonna be the bootstrap!!!")
-    MY_ADDRESS = '192.168.0.2'
+    MY_ADDRESS = get_my_ip()
     # Number of nodes in network
     NETWORK_SIZE = 5
     #IDs
@@ -98,8 +95,9 @@ else:
     # Bootstrap node address (we suppose it is known to everyone)
     SERVER_ADDRESS = '192.168.0.2'
     MY_NODE = setup_regular_node()
+    #print("We are OK, MY_NODE is " + MY_NODE is None)
 
-@app.route('/add_to_client_ring', methods=['POST'])
+@app.route('/add_to_client_ring', methods=['POST', 'GET'])
 def add_to_client_ring():
     print("This has to be a dict")
     print(request.form.to_dict())
@@ -131,10 +129,11 @@ def add_to_ring():
     #print(MY_NODE.ring)
     # 2)
 
-    if (next_id == 3):
+    if (next_id == 2):
 	### YOU SHOULD BROADCAST THE LIST NOW
         print("BROADCASTING!")
-        broadcast_info()
+        broadcast_info() #TODO: On the last node you have to send the result and then broadcast,
+                         # otherwise the node is NULL
     
 
     return (str(next_id))
