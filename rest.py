@@ -65,7 +65,13 @@ def get_my_ip():
 def broadcast_info():
     print("RING: ")
     print(MY_NODE.ring)
+    print("Trying to print the first ip:")
+    print(MY_NODE.ring[0]['ip'])
+    for data_line in MY_NODE.ring:
+        print("data_line is ", data_line)
+        print("data_line['ip'] is ", data_line['ip'])
 
+        # r = requests.post("http://" + data_line['ip'] + ":5000/add_to_client_ring", data={'id':})
 
 
 
@@ -91,6 +97,10 @@ else:
     SERVER_ADDRESS = '192.168.0.2'
     MY_NODE = setup_regular_node()
 
+@app.route('/add_to_client_ring', methods=['POST'])
+def add_to_client_ring():
+    MY_NODE.ring.append({'id':request.form.to_dict()['id'], 'ip':request.remote_addr,'public_key':request.form.to_dict()['public_key']})
+
 
 # Add the calling node to the ring
 # 1) Add the node to the ring
@@ -115,9 +125,10 @@ def add_to_ring():
     print(MY_NODE.ring)
     # 2)
 
-    #if (next_id == 5):
+    if (next_id == 3):
 	### YOU SHOULD BROADCAST THE LIST NOW
-    broadcast_info()
+        print("BROADCASTING!")
+        broadcast_info()
     
 
     return (str(next_id))
