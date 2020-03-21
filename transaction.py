@@ -25,8 +25,7 @@ class Transaction:
         self.recipient = recipient
         self.amount = amount    
         self.index = index
-        self.inputs = inputs 
-        #self.transaction_outputs: λίστα από Transaction Output 
+        self.inputs = inputs  
         self.signature = signature
         self.outputs = []
 
@@ -49,8 +48,8 @@ class Transaction:
     def genesis_transaction(self, mywallet, participants):
 
         t = Transaction(
-            sender = mywallet.get_private_key(), 
-            recipient = mywallet.get_private_key(),
+            sender = mywallet.get_public_key(), 
+            recipient = mywallet.get_public_key(),
             amount = 100*participants,
             inputs = [])
         
@@ -61,5 +60,38 @@ class Transaction:
             'amount': t.amount
         }]
 
-        wallet.utxos[wallet.get_public_key()] = t.outputs[0]
+        wallet.utxos[mywallet.get_public_key()] = t.outputs[0]
+        wallet.mywallet.transactions.append(t)
+
+    def create_transaction(self, mywallet, recipient, amount):
         
+        inputs = wallet.utxos[mywallet.get_public_key()]
+        balance = mywallet.balance
+        if balance < amount:
+            raise Exception('not enough money')
+ 
+        t = Transaction(
+            sender = mywallet.get_public_key(),
+            recipient = recipient,
+            amount = amount,
+            inputs = inputs
+        )
+        t.sign()
+        t.outputs = [{
+            'id': t.index,
+            'who': t.sender,
+            'amount': balance - amount
+        },{
+            'id': t.index,
+            'who': t.recipient,
+            'amount': amount           
+        }]
+
+        wallet.utxos[mywallet.sender] = t.ouptus[0]
+        wallet.utxos[recipient].append(t.outputs[1])
+
+        wallet.mywallet.transactions.append(t) 
+
+
+
+

@@ -33,10 +33,10 @@ class Wallet:
 		# print([public_key, private_key])
 		return [public_key, private_key]
 
-	def balance(self, UTXOS):
+	def balance(self):
     	# just a prototype. UTXOS is the list of all uspent transactions
 		balance = 0 
-		for i in UTXOS:
+		for i in utxos['amount']:
 			balance += i 
 		return balance
 
