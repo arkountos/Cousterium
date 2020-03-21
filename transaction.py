@@ -1,6 +1,7 @@
 #from collections import OrderedDict
 import collections
 import wallet
+import node
 import binascii
 import datetime
 import Crypto
@@ -27,6 +28,7 @@ class Transaction:
         self.inputs = inputs 
         #self.transaction_outputs: λίστα από Transaction Output 
         self.signature = signature
+        self.outputs = []
 
     # structure to use all infos as message in signature
     def to_dict(self):
@@ -43,3 +45,21 @@ class Transaction:
         self.index = myhash
         h = SHA384.new(json.dumps(self.to_dict()).encode()).hexdigest()
         self.signature = binascii.hexlify(signer.sign(h)).decode()
+
+    def genesis_transaction(self, mywallet, participants):
+
+        t = Transaction(
+            sender = mywallet.get_private_key(), 
+            recipient = mywallet.get_private_key(),
+            amount = 100*participants,
+            inputs = [])
+        
+        t.sign_trans()
+        t.outputs = [{
+            'id': t.index,
+            'who': t.sender,
+            'amount': t.amount
+        }]
+
+        wallet.utxos[wallet.get_public_key()] = t.outputs[0]
+        
