@@ -6,7 +6,7 @@ import json
 capacity = 10 
 
 class Block:
-	def __init__(self, id, previousHash, current_hash, listOfTransactions, nonce=0):
+	def __init__(self, id, previousHash, capacity, difficulty, listOfTransactions=[], current_hash=None, nonce=0):
 		##set
 		# nonce = 0 only if we dont give any argument 
 		self.id = id
@@ -14,7 +14,9 @@ class Block:
 		self.timestamp = datetime.datetime.utcnow()
 		self.current_hash = current_hash   
 		self.nonce = nonce 
-		self.listOfTransactions = []
+		self.capacity = capacity
+		self.difficulty = difficulty
+		self.listOfTransactions = listOfTransactions
 
 	def myHash(self):
 		return (sha256.new(self.dump().encode()).hexdigest())
