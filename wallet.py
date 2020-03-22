@@ -34,9 +34,9 @@ class Wallet:
 		return [public_key, private_key]
 
 	def balance(self):
-    	# just a prototype. UTXOS is the list of all uspent transactions
+    	myutxo = utxo[self.public_key]
 		balance = 0 
-		for i in utxos['amount']:
+		for i in myutxo['amount']:
 			balance += i 
 		return balance
 
