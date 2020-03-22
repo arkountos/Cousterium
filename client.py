@@ -12,7 +12,7 @@ def hello():
 @click.command()
 def connect():
     click.echo("Connecting to bootstrap...")
-    r = requests.get("http://192.168.0.2/test")
+    r = requests.get("http://192.168.0.3:5000/setup_myself")
     click.echo("Returned this:")
     click.echo(r.text)
 

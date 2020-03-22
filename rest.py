@@ -32,25 +32,26 @@ def setup_bootstrap_node():
     return (myNode)
 
 # Setup a regular participant node
-def setup_regular_node():
+def create_regular_node():
     # Create node and associate with VM via address
     myNode = node.Node(0, MY_ADDRESS)
 
+    print("I RETURN: ")
+    print((myNode is None))
+    return(myNode)
+    
+def setup():
     # Our node sends it's publik key (= wallet address = MY_ADDRESS ? )
     # and receives a unique id (0..NETWORK_SIZE) 
     print('http://' + SERVER_ADDRESS + ':5000/add_to_ring')
-    r = requests.post('http://' + SERVER_ADDRESS + ':5000/add_to_ring', data = {'public_key':myNode.wallet.get_public_key()})
+    r = requests.post('http://' + SERVER_ADDRESS + ':5000/add_to_ring', data = {'public_key':MY_NODE.wallet.get_public_key()})
     print("The answer from the server is: \nr: ")
     print(r)
     print("\nr.text ")
     print(r.text)
     # Set node id to the id you got on the response
-    myNode.set_id(r.text)
+    MY_NODE.set_id(r.text)
     #print("MY_NODE IS: ", myNode)
-    print("I RETURN: ")
-    print((myNode is None))
-    return(myNode)
-    
 
 # A function to get the VM's private IP (e.g. 192.168.0.4)
 def get_my_ip():
@@ -70,12 +71,17 @@ def broadcast_info():
     print("RING: ")
     print(MY_NODE.ring)
     #print("BROADCASTING TO: " +  "http://" + data_line['ip'] + ":5000/test")
-    r = requests.get("http://192.168.0.3:5000/test")
+    for entry in MY_NODE.ring:
+        print("TO: ", "http://" + entry['ip'] + ":5000/add_to_client_ring")
+        r = requests.post("http://" + entry['ip'] + ":5000/add_to_client_ring", data=MY_NODE.ring)
+        
 
 
 
 
 app = Flask(__name__)
+
+# run it once fore every node
 
 #### IF BOOTSTRAP NODE ####
 if (get_my_ip() == '192.168.0.2'):
@@ -94,7 +100,8 @@ else:
     MY_ADDRESS = get_my_ip()
     # Bootstrap node address (we suppose it is known to everyone)
     SERVER_ADDRESS = '192.168.0.2'
-    MY_NODE = setup_regular_node()
+    MY_NODE = create_regular_node()
+    
     #print("We are OK, MY_NODE is " + MY_NODE is None)
 
 @app.route('/add_to_client_ring', methods=['POST', 'GET'])
@@ -102,43 +109,29 @@ def add_to_client_ring():
     print("This has to be a dict")
     print(request.form.to_dict())
     MY_NODE.ring.append(request.form.to_dict())
-
+    print("Node with id ")
+    print(MY_NODE.id)
+    print(" has ring: ")
+    print(MY_NODE.ring)
     return("OK!")
+
+@app.route('/setup_myself', methods=['GET'])
+def setup_myself():
+	setup()
+	return("Node setup with id " + MY_NODE.id)
 
 
 # Add the calling node to the ring
-# 1) Add the node to the ring
-# 2) Send back an id
 @app.route('/add_to_ring', methods=['POST'])
 def add_to_ring():
-    next_id = NODE_IDS.pop()
-    
-    #print("Start of request")
-    #print(request.form.to_dict())
-    #print("End of request")
-    # request.form.to_dict() is
-    # {'public_key':'gawhretsyrjesshr3546uet'}    
-    
-    # 1)
-    #print("We are appending ", {'ip':request.remote_addr, 'public_key':request.form.to_dict()['public_key']})
+    next_id = NODE_IDS.pop() 
     MY_NODE.ring.append({'id': next_id, 'ip':request.remote_addr, 'public_key':request.form.to_dict()['public_key']})
-    # Instead we can do
-    # MY_NODE.register_node_to_ring(next_id, request.form.to_dict()[1])
+    if next_id == 3:
+        broadcast_info()
+        print("Broadcast successful!")
+    return ("Node added to ring succesfully!")
 
-    #print("MY_NODE contains:")
-    #print(MY_NODE.ring)
-    # 2)
-
-    if (next_id == 2):
-	### YOU SHOULD BROADCAST THE LIST NOW
-        print("BROADCASTING!")
-        broadcast_info() #TODO: On the last node you have to send the result and then broadcast,
-                         # otherwise the node is NULL
-    
-
-    return (str(next_id))
-
-@app.route('/test')
+@app.route('/test', methods=['GET'])
 def test():
     print('Address: ' + json.dumps(MY_ADDRESS))
     return('Address: ' + json.dumps(MY_ADDRESS))
@@ -153,8 +146,6 @@ def get_transactions():
     return jsonify(response), 200
 
 
-# run it once fore every node
-
 if __name__ == '__main__':
     from argparse import ArgumentParser
 
@@ -164,3 +155,4 @@ if __name__ == '__main__':
     port = args.port
     print("Serving at: ", MY_ADDRESS)
     app.run(host=MY_ADDRESS, port=port)
+
