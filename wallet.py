@@ -34,7 +34,7 @@ class Wallet:
 		return [public_key, private_key]
 
 	def balance(self):
-    	myutxo = utxo[self.public_key]
+		myutxo = utxos[self.public_key]
 		balance = 0 
 		for i in myutxo['amount']:
 			balance += i 

@@ -56,9 +56,46 @@ class Node:
 			return False
 
 
-	def validate_transaction():
+	def validate_transaction(self,wallet,transaction):
 		#use of signature and NBCs balance
-		pass
+		t = transaction
+		w = wallet
+		if not verify_signature(t):
+			raise Exception('Verification failure')
+		
+		sender_utxos = wallet.utxos[w.get_public_key()].copy()
+		balance = w.balance()
+
+		if balance < t.amount:
+			raise Exception('Ftwxe')
+
+		#Check if inputs are utxos
+		for tid in t.inputs:
+			c = False
+			for utxo in sender_utxos:
+				if tid == utxo['id'] and utxo['who'] == t.sender:
+					c = True
+					sender_utxos.remove(utxo)
+					break
+
+			if not c:
+				raise Exception('Input not utxo')
+
+		t.outputs = [{
+			'id': t.index,
+			'who': t.sender,
+			'amount': balance - amount
+		},{
+			'id': t.index,
+			'who': t.recipient,
+			'amount': amounnt
+		}]
+
+		wallet.utxos[t.sender].append(t.outputs[0])
+		wallet.utxos[t.recipient].append(t.outputs[1])
+		wallet.w.transactions.append(t)
+
+		return t
 
 
 	def add_transaction_to_block(self, transaction):

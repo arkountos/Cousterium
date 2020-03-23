@@ -63,6 +63,8 @@ class Transaction:
         wallet.utxos[mywallet.get_public_key()] = t.outputs[0]
         wallet.mywallet.transactions.append(t)
 
+        return True
+
     # possible use of copy for dicitonaries  
     def create_transaction(self, mywallet, recipient, amount):
         
@@ -92,6 +94,8 @@ class Transaction:
         wallet.utxos[recipient].append(t.outputs[1])
 
         wallet.mywallet.transactions.append(t) 
+
+        return t
 
 
 
