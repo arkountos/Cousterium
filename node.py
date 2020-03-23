@@ -1,5 +1,11 @@
 import block
 import wallet
+import Crypto
+import Crypto.Random
+from Crypto.Hash import SHA384
+from Crypto.PublicKey import RSA
+from Crypto.Signature import PKCS1_v1_5
+import json
 
 class Node:
 
@@ -38,10 +44,19 @@ class Node:
 		pass
 
 
+	def verify_signature(self, transaction):
+		#receiver node verifies signature of sender node
+		signature = transaction.signature
+		h = SHA384.new(json.dumps(transaction.to_dict()).encode()).hexdigest()
+		public_key = transaction.sender
+		verifier = PKCS1_v1_5.new(public_key)
+		if(verifier.verify(h, signature)):
+			return True
+		else:
+			return False
 
 
-
-	def validdate_transaction():
+	def validate_transaction():
 		#use of signature and NBCs balance
 		pass
 
