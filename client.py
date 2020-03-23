@@ -21,5 +21,3 @@ cli.add_command(connect)
 
 if __name__ == '__main__':
     cli()
-
-python3 client.py connect

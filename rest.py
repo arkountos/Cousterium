@@ -22,13 +22,15 @@ def setup_bootstrap_node():
     # Need to add the first and only transaction to the genesis block
     print("The bootstrap node's wallet private key is ")
     print(myNode.wallet.get_private_key())
-    first_transaction = transaction.Transaction( sender=0, recipient=MY_ADDRESS, amount=NETWORK_SIZE * 100, inputs=[])
+    first_transaction = transaction.genesis_transaction(myNode.wallet, NETWORK_SIZE)    
+    #first_transaction = transaction.Transaction( sender=0, recipient=MY_ADDRESS, amount=NETWORK_SIZE * 100, inputs=[])
     # TODO: Use transaction.genesis_transaction
     genesis_block.add_transaction(first_transaction)
 
     # Add the first block to the node's blockchain
     myNode.chain.append(genesis_block)
-
+    print("Bootstrap node has: ")
+    print(myNode.wallet.calculate_balance())
     # Return the node
     return (myNode)
 
@@ -117,6 +119,9 @@ def add_to_client_ring():
     print(MY_NODE.id)
     print(" has ring: ")
     print(MY_NODE.ring)
+    MY_NODE.wallet.utxos[request.form.to_dict()['public_key']] = []
+    print("The node's utxos")
+    print(MY_NODE.wallet.utxos)
     return("OK!")
 
 @app.route('/setup_myself', methods=['GET'])
@@ -139,7 +144,7 @@ def add_to_ring():
     
     ### GIVE HIM 100 NBC ###
 
-    first_transaction = transaction.create_transaction(MY_NODE.wallet.get_public_key(), request.form.to_dict()['public_key'], 100)
+    first_transaction = transaction.create_transaction(MY_NODE.wallet, request.form.to_dict()['public_key'], 100)
     print("Sending transaction to: ")
     print("http://" + request.remote_addr + ":5000/incoming_transaction")
     r = requests.post("http://" + request.remote_addr + ":5000/incoming_transaction", data={'transaction': first_transaction, 'wallet': MY_NODE.wallet})
