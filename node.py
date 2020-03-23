@@ -7,6 +7,63 @@ from Crypto.PublicKey import RSA
 from Crypto.Signature import PKCS1_v1_5
 import json
 
+
+def verify_signature(transaction):
+	#receiver node verifies signature of sender node
+	signature = transaction.signature
+	h = SHA384.new(json.dumps(transaction.to_dict()).encode()).hexdigest()
+	public_key = transaction.sender
+	verifier = PKCS1_v1_5.new(public_key)
+	if(verifier.verify(h, signature)):
+		return True
+	else:
+		return False
+
+
+def validate_transaction(sender_wallet,transaction):
+	#use of signature and NBCs balance
+	t = transaction
+	w = sender_wallet
+	if not verify_signature(t):
+		raise Exception('Verification failure')
+	
+	sender_utxos = sender_wallet.utxos[w.get_public_key()].copy()
+	balance = w.balance()
+
+	if balance < t.amount:
+		raise Exception('Ftwxe')
+
+	#Check if inputs are utxos
+	for tid in t.inputs:
+		c = False
+		for utxo in sender_utxos:
+			if tid == utxo['id'] and utxo['who'] == t.sender:
+				c = True
+				sender_utxos.remove(utxo)
+				break
+
+		if not c:
+			raise Exception('Input not utxo')
+
+	t.outputs = [{
+		'id': t.index,
+		'who': t.sender,
+		'amount': balance - t.amount
+	},{
+		'id': t.index,
+		'who': t.recipient,
+		'amount': t.amount
+	}]
+
+	sender_wallet.utxos[t.sender].append(t.outputs[0])
+	sender_wallet.utxos[t.recipient].append(t.outputs[1])
+	sender_wallet.w.transactions.append(t)
+
+	return True
+
+
+
+
 class Node:
 
 	# FIVOS
@@ -42,60 +99,6 @@ class Node:
 
 	def broadcast_transaction():
 		pass
-
-
-	def verify_signature(self, transaction):
-		#receiver node verifies signature of sender node
-		signature = transaction.signature
-		h = SHA384.new(json.dumps(transaction.to_dict()).encode()).hexdigest()
-		public_key = transaction.sender
-		verifier = PKCS1_v1_5.new(public_key)
-		if(verifier.verify(h, signature)):
-			return True
-		else:
-			return False
-
-
-	def validate_transaction(self,wallet,transaction):
-		#use of signature and NBCs balance
-		t = transaction
-		w = wallet
-		if not verify_signature(t):
-			raise Exception('Verification failure')
-		
-		sender_utxos = wallet.utxos[w.get_public_key()].copy()
-		balance = w.balance()
-
-		if balance < t.amount:
-			raise Exception('Ftwxe')
-
-		#Check if inputs are utxos
-		for tid in t.inputs:
-			c = False
-			for utxo in sender_utxos:
-				if tid == utxo['id'] and utxo['who'] == t.sender:
-					c = True
-					sender_utxos.remove(utxo)
-					break
-
-			if not c:
-				raise Exception('Input not utxo')
-
-		t.outputs = [{
-			'id': t.index,
-			'who': t.sender,
-			'amount': balance - amount
-		},{
-			'id': t.index,
-			'who': t.recipient,
-			'amount': amounnt
-		}]
-
-		wallet.utxos[t.sender].append(t.outputs[0])
-		wallet.utxos[t.recipient].append(t.outputs[1])
-		wallet.w.transactions.append(t)
-
-		return t
 
 
 	def add_transaction_to_block(self, transaction):

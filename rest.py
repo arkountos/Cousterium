@@ -23,6 +23,7 @@ def setup_bootstrap_node():
     print("The bootstrap node's wallet private key is ")
     print(myNode.wallet.get_private_key())
     first_transaction = transaction.Transaction( sender=0, recipient=MY_ADDRESS, amount=NETWORK_SIZE * 100, inputs=[])
+    # TODO: Use transaction.genesis_transaction
     genesis_block.add_transaction(first_transaction)
 
     # Add the first block to the node's blockchain
@@ -52,6 +53,9 @@ def setup():
     # Set node id to the id you got on the response
     MY_NODE.set_id(r.text)
     #print("MY_NODE IS: ", myNode)
+
+    ### GIVE ME 100 NBC ###
+    
 
 # A function to get the VM's private IP (e.g. 192.168.0.4)
 def get_my_ip():
@@ -120,15 +124,36 @@ def setup_myself():
 	setup()
 	return("Node setup with id " + MY_NODE.id)
 
+@app.route('/incoming_transaction')
+def incoming_transaction():
+    if (node.validate_transaction(request.form.to_dict()['wallet'], request.form.to_dict()['transaction'])):
+        pass
+
+
 
 # Add the calling node to the ring
 @app.route('/add_to_ring', methods=['POST'])
 def add_to_ring():
     next_id = NODE_IDS.pop() 
     MY_NODE.ring.append({'id': next_id, 'ip':request.remote_addr, 'public_key':request.form.to_dict()['public_key']})
-    if next_id == 3:
+    
+    ### GIVE HIM 100 NBC ###
+
+    first_transaction = transaction.create_transaction(MY_NODE.wallet.get_public_key(), request.form.to_dict()['public_key'], 100)
+    print("Sending transaction to: ")
+    print("http://" + request.remote_addr + ":5000/incoming_transaction")
+    r = requests.post("http://" + request.remote_addr + ":5000/incoming_transaction", data={'transaction': first_transaction, 'wallet': MY_NODE.wallet})
+    print("Returned with answer: ")
+    print(r)
+    print(r.text)
+    #request.form , request.text
+    #requests.get, requests.post
+
+
+    if next_id == NETWORK_SIZE:
         broadcast_info()
         print("Broadcast successful!")
+    
     return ("Node added to ring succesfully!")
 
 @app.route('/test', methods=['GET'])

@@ -16,6 +16,59 @@ import requests
 from flask import Flask, jsonify, request, render_template
 
 
+def genesis_transaction(mywallet, participants):
+
+    t = Transaction(
+        sender = mywallet.get_public_key(), 
+        recipient = mywallet.get_public_key(),
+        amount = 100*participants,
+        inputs = [])
+    
+    t.sign_trans()
+    t.outputs = [{
+        'id': t.index,
+        'who': t.sender,
+        'amount': t.amount
+    }]
+
+    wallet.utxos[mywallet.get_public_key()] = t.outputs[0]
+    wallet.mywallet.transactions.append(t)
+
+    return True
+
+
+# possible use of copy for dicitonaries  
+def create_transaction(mywallet, recipient, amount):
+    
+    inputs = wallet.utxos[mywallet.get_public_key()].copy()
+    balance = mywallet.balance
+    if balance < amount:
+        raise Exception('not enough money')
+
+    t = Transaction(
+        sender = mywallet.get_public_key(),
+        recipient = recipient,
+        amount = amount,
+        inputs = inputs
+    )
+    t.sign()
+    t.outputs = [{
+        'id': t.index,
+        'who': t.sender,
+        'amount': balance - amount
+    },{
+        'id': t.index,
+        'who': t.recipient,
+        'amount': amount           
+    }]
+
+    wallet.utxos[mywallet.sender] = t.outputs[0]
+    wallet.utxos[recipient].append(t.outputs[1])
+
+    wallet.mywallet.transactions.append(t) 
+
+    return t
+
 class Transaction:
 
     def __init__(self, sender, recipient, amount, inputs, signature=None, index=None):
@@ -45,57 +98,6 @@ class Transaction:
         h = SHA384.new(json.dumps(self.to_dict()).encode()).hexdigest()
         self.signature = binascii.hexlify(signer.sign(h)).decode()
 
-    def genesis_transaction(self, mywallet, participants):
-
-        t = Transaction(
-            sender = mywallet.get_public_key(), 
-            recipient = mywallet.get_public_key(),
-            amount = 100*participants,
-            inputs = [])
-        
-        t.sign_trans()
-        t.outputs = [{
-            'id': t.index,
-            'who': t.sender,
-            'amount': t.amount
-        }]
-
-        wallet.utxos[mywallet.get_public_key()] = t.outputs[0]
-        wallet.mywallet.transactions.append(t)
-
-        return True
-
-    # possible use of copy for dicitonaries  
-    def create_transaction(self, mywallet, recipient, amount):
-        
-        inputs = wallet.utxos[mywallet.get_public_key()].copy()
-        balance = mywallet.balance
-        if balance < amount:
-            raise Exception('not enough money')
- 
-        t = Transaction(
-            sender = mywallet.get_public_key(),
-            recipient = recipient,
-            amount = amount,
-            inputs = inputs
-        )
-        t.sign()
-        t.outputs = [{
-            'id': t.index,
-            'who': t.sender,
-            'amount': balance - amount
-        },{
-            'id': t.index,
-            'who': t.recipient,
-            'amount': amount           
-        }]
-
-        wallet.utxos[mywallet.sender] = t.outputs[0]
-        wallet.utxos[recipient].append(t.outputs[1])
-
-        wallet.mywallet.transactions.append(t) 
-
-        return t
 
 
 
