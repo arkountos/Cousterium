@@ -32,7 +32,7 @@ def genesis_transaction(mywallet, participants):
         'amount': t.amount
     }]
 
-    wallet.utxos[mywallet.get_public_key()] = t.outputs[0]
+    wallet.utxos[mywallet.get_public_key()] = [t.outputs[0]]
     print("WHAT MOEY DO I HAVE???")
     print(wallet.utxos[mywallet.get_public_key()])
     mywallet.transactions.append(t)

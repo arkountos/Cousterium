@@ -37,14 +37,11 @@ class Wallet:
 		return [public_key, private_key]
 
 	def calculate_balance(self):
-		print("In balance")
-		print("NEAT UTXO")
-		print(utxos)
-		print("utxos[self.public_key], where self.public_key is:")
-		print(self.public_key + "\n")
-		print(utxos[self.public_key])
-		# myutxo is a list []
-		
+		myutxo = utxos[self.public_key]
+		balance = 0
+		for entry in myutxo:
+			balance += entry['amount']
+		return balance		
 
 	def get_private_key(self):
 		return self.private_key
