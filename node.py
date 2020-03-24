@@ -1,3 +1,4 @@
+import transaction
 import block
 import wallet
 import Crypto
@@ -8,11 +9,11 @@ from Crypto.Signature import PKCS1_v1_5
 import json
 
 
-def verify_signature(transaction):
+def verify_signature(my_transaction):
 	#receiver node verifies signature of sender node
-	signature = transaction.signature
-	h = SHA384.new(json.dumps(transaction.to_dict()).encode()).hexdigest()
-	public_key = transaction.sender
+	signature = my_transaction.signature
+	h = SHA384.new(json.dumps(my_transaction.to_dict()).encode()).hexdigest()
+	public_key = my_transaction.sender
 	verifier = PKCS1_v1_5.new(public_key)
 	if(verifier.verify(h, signature)):
 		return True
@@ -20,9 +21,13 @@ def verify_signature(transaction):
 		return False
 
 
-def validate_transaction(sender_wallet,transaction):
+def validate_transaction(sender_wallet,my_transaction):
 	#use of signature and NBCs balance
-	t = transaction
+	print("my_transaction is: ")
+	print(my_transaction)
+	t = my_transaction
+	print("t is ")
+	print(t)
 	w = sender_wallet
 	if not verify_signature(t):
 		raise Exception('Verification failure')

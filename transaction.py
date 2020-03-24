@@ -72,8 +72,13 @@ def create_transaction(mywallet, recipient, amount):
     else:
         wallet.utxos[recipient].append(t.outputs[1])
 
-    mywallet.transactions.append(t) 
-
+    mywallet.transactions.append(t)
+     
+    print("create_transaction returns (t) : ")
+    print(t)
+    print("of type")
+    print(type(t))
+    print(t.signature)
     return t
 
 class Transaction:

@@ -1,5 +1,6 @@
 from flask import Flask, jsonify, request, render_template
 
+import jsonpickle
 import block
 import node
 import wallet
@@ -20,8 +21,8 @@ def setup_bootstrap_node():
     genesis_block = block.Block(0, -1, [], []) # TODO: we shouldn't have to pass emtpy list as listOfTransactions in constructor, see with peppas
 
     # Need to add the first and only transaction to the genesis block
-    print("The bootstrap node's wallet private key is ")
-    print(myNode.wallet.get_private_key())
+    #print("The bootstrap node's wallet private key is ")
+    #print(myNode.wallet.get_private_key())
     first_transaction = transaction.genesis_transaction(myNode.wallet, NETWORK_SIZE)    
     #first_transaction = transaction.Transaction( sender=0, recipient=MY_ADDRESS, amount=NETWORK_SIZE * 100, inputs=[])
     # TODO: Use transaction.genesis_transaction
@@ -129,9 +130,12 @@ def setup_myself():
 	setup()
 	return("Node setup with id " + MY_NODE.id)
 
-@app.route('/incoming_transaction')
+@app.route('/incoming_transaction', methods=['POST'])
 def incoming_transaction():
-    if (node.validate_transaction(request.form.to_dict()['wallet'], request.form.to_dict()['transaction'])):
+    
+    pickle_first_transaction = request.form.to_dict()['transaction']
+    first_transaction = jsonpickle.decode(pickle_first_transaction)
+    if (node.validate_transaction(request.form.to_dict()['wallet'], first_transaction)):
         pass
 
 
@@ -145,9 +149,14 @@ def add_to_ring():
     ### GIVE HIM 100 NBC ###
 
     first_transaction = transaction.create_transaction(MY_NODE.wallet, request.form.to_dict()['public_key'], 100)
+    
+    print("Pickle'ing the first_transaction object")
+    pickle = jsonpickle.encode(first_transaction)
+    print(pickle)
+
     print("Sending transaction to: ")
     print("http://" + request.remote_addr + ":5000/incoming_transaction")
-    r = requests.post("http://" + request.remote_addr + ":5000/incoming_transaction", data={'transaction': first_transaction, 'wallet': MY_NODE.wallet})
+    r = requests.post("http://" + request.remote_addr + ":5000/incoming_transaction", data={'transaction': pickle, 'wallet': MY_NODE.wallet})
     print("Returned with answer: ")
     print(r)
     print(r.text)
