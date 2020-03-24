@@ -44,7 +44,7 @@ def genesis_transaction(mywallet, participants):
 def create_transaction(mywallet, recipient, amount):
     
     inputs = wallet.utxos[mywallet.get_public_key()].copy()
-    balance = mywallet.balance
+    balance = mywallet.calculate_balance()
     if balance < amount:
         raise Exception('not enough money')
 
@@ -55,7 +55,7 @@ def create_transaction(mywallet, recipient, amount):
         amount = amount,
         inputs = inputs
     )
-    t.sign()
+    t.sign_trans()
     t.outputs = [{
         'id': t.index,
         'who': t.sender,
@@ -66,10 +66,13 @@ def create_transaction(mywallet, recipient, amount):
         'amount': amount           
     }]
 
-    wallet.utxos[mywallet.sender] = t.outputs[0]
-    wallet.utxos[recipient].append(t.outputs[1])
+    wallet.utxos[mywallet.get_public_key()] = [t.outputs[0]]
+    if recipient not in wallet.utxos.keys():	
+        wallet.utxos[recipient] = [t.outputs[1]]
+    else:
+        wallet.utxos[recipient].append(t.outputs[1])
 
-    wallet.mywallet.transactions.append(t) 
+    mywallet.transactions.append(t) 
 
     return t
 
