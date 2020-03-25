@@ -7,6 +7,8 @@ from Crypto.Hash import SHA384
 from Crypto.PublicKey import RSA
 from Crypto.Signature import PKCS1_v1_5
 import json
+import jsonpickle
+import requests
 
 
 def verify_signature(my_transaction):
@@ -110,8 +112,13 @@ class Node:
 
 
 
-	def broadcast_transaction():
-		pass
+	def broadcast_transaction(self, my_transaction):
+		for dictionary in self.ring:
+			# Send the transaction to every ip in node.ring
+			print(dictionary['ip'])
+			url = "http://" + dictionary['ip'] + ":5000/incoming_transaction"
+			my_transaction_pickle = jsonpickle.encode(my_transaction)
+			requests.post(url, data = {'transaction': my_transaction, 'wallet': self.wallet})
 
 
 	def add_transaction_to_block(self, transaction):

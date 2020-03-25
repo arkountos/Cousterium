@@ -1,14 +1,11 @@
 import netifaces
-
-interfaces = netifaces.interfaces()
-for i in interfaces:
-    if i == 'lo':
-        continue
-    iface = netifaces.ifaddresses(i).get(netifaces.AF_INET)
-    if iface != None:
-        for my_j in iface:
-           # print (my_j['addr'])
-           pass
-
-iface = netifaces.ifaddresses('eth1').get(netifaces.AF_INET)
-print(iface[0]["addr"])
+# A function to get the VM's private IP (e.g. 192.168.0.4)
+def get_my_ip():
+    """
+    Find my private IP address
+    :return:
+    """
+    iface = netifaces.ifaddresses('eth1').get(netifaces.AF_INET)
+    result = iface[0]["addr"]
+    print(result)
+    return(result)

@@ -9,6 +9,7 @@ import socket
 import json
 import requests
 import netifaces
+from ip import get_my_ip
 
 # Setup the bootstrap node
 def setup_bootstrap_node():
@@ -60,16 +61,7 @@ def setup():
     ### GIVE ME 100 NBC ###
     
 
-# A function to get the VM's private IP (e.g. 192.168.0.4)
-def get_my_ip():
-    """
-    Find my private IP address
-    :return:
-    """
-    iface = netifaces.ifaddresses('eth1').get(netifaces.AF_INET)
-    result = iface[0]["addr"]
-    print(result)
-    return(result)
+
 
 # A function to broadcast the ring information to all the nodes,
 # when every node joins the system.
@@ -125,18 +117,34 @@ def add_to_client_ring():
     print(MY_NODE.wallet.utxos)
     return("OK!")
 
+
+
 @app.route('/setup_myself', methods=['GET'])
 def setup_myself():
 	setup()
 	return("Node setup with id " + MY_NODE.id)
 
+
+
 @app.route('/incoming_transaction', methods=['POST'])
 def incoming_transaction():
     
-    pickle_first_transaction = request.form.to_dict()['transaction']
-    first_transaction = jsonpickle.decode(pickle_first_transaction)
-    if (node.validate_transaction(request.form.to_dict()['wallet'], first_transaction)):
+    pickle_transaction = request.form.to_dict()['transaction']
+    my_transaction = jsonpickle.decode(pickle_transaction)
+    if (node.validate_transaction(request.form.to_dict()['wallet'], my_transaction)):
         pass
+
+
+
+@app.route('/send_money')
+def send_money():
+    # Create the transaction
+    # This runs on the node that sends the money
+    
+    #TODO: in create_transaction, what is 'recipient'? Is it the object or the public key
+    # I use public key here.
+    my_transaction = transaction.create_transaction(MY_NODE.wallet.get_public_key(), request.form.to_dict()['id'], request.form.to_dict()['amount'])
+    MY_NODE.broadcast_transaction(my_transaction)
 
 
 
@@ -147,7 +155,6 @@ def add_to_ring():
     MY_NODE.ring.append({'id': next_id, 'ip':request.remote_addr, 'public_key':request.form.to_dict()['public_key']})
     
     ### GIVE HIM 100 NBC ###
-
     first_transaction = transaction.create_transaction(MY_NODE.wallet, request.form.to_dict()['public_key'], 100)
     
     print("Pickle'ing the first_transaction object")
@@ -160,9 +167,6 @@ def add_to_ring():
     print("Returned with answer: ")
     print(r)
     print(r.text)
-    #request.form , request.text
-    #requests.get, requests.post
-
 
     if next_id == NETWORK_SIZE:
         broadcast_info()
@@ -170,19 +174,13 @@ def add_to_ring():
     
     return ("Node added to ring succesfully!")
 
+
+
 @app.route('/test', methods=['GET'])
 def test():
     print('Address: ' + json.dumps(MY_ADDRESS))
     return('Address: ' + json.dumps(MY_ADDRESS))
 
-# get all transactions in the blockchain
-
-@app.route('/transactions/get', methods=['GET'])
-def get_transactions():
-    transactions = blockchain.transactions
-
-    response = {'transactions': transactions}
-    return jsonify(response), 200
 
 
 if __name__ == '__main__':
