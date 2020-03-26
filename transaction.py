@@ -33,9 +33,9 @@ def genesis_transaction(mywallet, participants):
         'amount': t.amount
     }]
 
-    wallet.utxos[mywallet.get_public_key()] = [t.outputs[0]]
+    mywallet.utxos[mywallet.get_public_key()] = [t.outputs[0]]
     print("WHAT MOEY DO I HAVE???")
-    print(wallet.utxos[mywallet.get_public_key()])
+    print(mywallet.utxos[mywallet.get_public_key()])
     mywallet.transactions.append(t)
 
     return True
@@ -44,7 +44,7 @@ def genesis_transaction(mywallet, participants):
 # possible use of copy for dicitonaries  
 def create_transaction(mywallet, recipient, amount):
     
-    inputs = wallet.utxos[mywallet.get_public_key()].copy()
+    inputs = mywallet.utxos[mywallet.get_public_key()].copy()
     balance = mywallet.calculate_balance()
     if balance < amount:
         raise Exception('not enough money')

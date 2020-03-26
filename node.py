@@ -29,7 +29,9 @@ def verify_signature(my_transaction):
 
 
 def validate_transaction(sender_wallet,my_transaction):
-	#use of signature and NBCs balance
+	# sender_wallet : Is a wallet Object
+	# my_transaction : The transaction to be validated
+	# use of signature and NBCs balance
 	print("my_transaction is: ")
 	print(my_transaction)
 	t = my_transaction
@@ -42,8 +44,8 @@ def validate_transaction(sender_wallet,my_transaction):
 	#This was:
 	#sender_utxos = sender_wallet.utxos[w.get_public_key()].copy()
 	# And i changed it to:
-	sender_utxos = wallet.utxos[sender_wallet.get_public_key()].copy()
-	balance = w.balance()
+	sender_utxos = sender_wallet.utxos[sender_wallet.get_public_key()].copy()
+	balance = sender_wallet.balance()
 
 	if balance < t.amount:
 		raise Exception('Ftwxe')
@@ -72,8 +74,10 @@ def validate_transaction(sender_wallet,my_transaction):
 
 	sender_wallet.utxos[t.sender].append(t.outputs[0])
 	sender_wallet.utxos[t.recipient].append(t.outputs[1])
-	sender_wallet.w.transactions.append(t)
-
+	sender_wallet.transactions.append(t)
+	
+	
+	
 	return True
 
 
