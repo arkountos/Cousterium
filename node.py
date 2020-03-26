@@ -113,6 +113,7 @@ class Node:
 
 
 	def broadcast_transaction(self, my_transaction):
+		print("In broadcast_transaction")
 		for dictionary in self.ring:
 			# Send the transaction to every ip in node.ring
 			print(dictionary['ip'])

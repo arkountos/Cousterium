@@ -136,14 +136,15 @@ def incoming_transaction():
 
 
 
-@app.route('/send_money')
+@app.route('/send_money', methods=['POST'])
 def send_money():
+    print("In send_money()")
     # Create the transaction
     # This runs on the node that sends the money
     
     #TODO: in create_transaction, what is 'recipient'? Is it the object or the public key
-    # I use public key here.
-    my_transaction = transaction.create_transaction(MY_NODE.wallet.get_public_key(), request.form.to_dict()['id'], request.form.to_dict()['amount'])
+    # I use object here..
+    my_transaction = transaction.create_transaction(MY_NODE.wallet, request.form.to_dict()['ip'], int(request.form.to_dict()['amount']))
     MY_NODE.broadcast_transaction(my_transaction)
 
 

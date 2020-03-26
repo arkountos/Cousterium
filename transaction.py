@@ -10,6 +10,7 @@ from Crypto.Hash import SHA384
 from Crypto.PublicKey import RSA
 from Crypto.Signature import PKCS1_v1_5
 import json
+import base64
 #from hashlib import sha256
 import random
 import requests
@@ -104,13 +105,12 @@ class Transaction:
             'index': self.index})
 
     def sign_trans(self):
-        myhash = SHA384.new(json.dumps(self.to_dict()).encode()).hexdigest()
+        myhash = SHA384.new(json.dumps(self.to_dict()).encode())
         p_key = RSA.importKey(self.sender_private_key)
         signer = PKCS1_v1_5.new(p_key)
-        self.index = myhash
-        h = SHA384.new(json.dumps(self.to_dict()).encode()).hexdigest()
+        self.index = myhash.hexdigest()
         # TODO: Fix!
-        #self.signature = binascii.hexlify(signer.sign(h)).decode()
+        self.signature = base64.b64encode(signer.sign(myhash)).decode()
 
 
 

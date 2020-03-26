@@ -1,6 +1,6 @@
 import requests
 import click
-import addresses.addresses as addresses
+import addresses
 from ip import get_my_ip
 
 @click.group()
@@ -27,9 +27,11 @@ def t(id, amount):
     # Send amount CC another node
     #url = "http://" + addresses[id] + ':5000/send_money'
     print("Sending request")
-    my_ip = get_my_ip
+    my_ip = get_my_ip()
+    print(my_ip)
+    print(type(my_ip))
     url = "http://" + my_ip + ":5000/send_money"
-    r = requests.post(url, data={'ip': addresses[id], 'amount': amount})
+    r = requests.post(url, data={'ip': addresses.global_addresses[id], 'amount': amount})
     print(r)
 
 cli.add_command(hello)
