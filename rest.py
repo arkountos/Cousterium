@@ -58,7 +58,10 @@ def setup():
     MY_NODE.set_id(r.text)
     #print("MY_NODE IS: ", myNode)
 
-    ### GIVE ME 100 NBC ###
+    r = requests.get("http://" + SERVER_ADDRESS + ":5000/get_bootstrap_utxo")
+    print(r.text)
+    my_utxos = jsonpickle.decode(r.text)
+    print(type(my_utxos)) 
     
 
 
@@ -124,14 +127,21 @@ def setup_myself():
 	setup()
 	return("Node setup with id " + MY_NODE.id)
 
+@app.route('/get_bootstrap_utxo', methods=['GET'])
+def get_bootstrap_utxo():
+    my_utxo = jsonpickle.encode(MY_NODE.wallet.utxos)
+    return(my_utxo)
 
 
 @app.route('/incoming_transaction', methods=['POST'])
 def incoming_transaction():
     
     pickle_transaction = request.form.to_dict()['transaction']
+    pickle_wallet = request.form.to_dict()['wallet']
     my_transaction = jsonpickle.decode(pickle_transaction)
-    if (node.validate_transaction(request.form.to_dict()['wallet'], my_transaction)):
+    my_wallet = jsonpickle.decode(pickle_wallet)
+    if (node.validate_transaction(my_wallet, my_transaction)):
+        #If here we broadcast utxo to everyone
         pass
 
 
@@ -144,7 +154,15 @@ def send_money():
     
     #TODO: in create_transaction, what is 'recipient'? Is it the object or the public key
     # I use object here..
-    my_transaction = transaction.create_transaction(MY_NODE.wallet, request.form.to_dict()['ip'], int(request.form.to_dict()['amount']))
+    for dictionary in MY_NODE.ring:
+        print(dictionary['ip'])
+        print(request.form.to_dict()['ip'])
+        if dictionary['ip'] == request.form.to_dict()['ip']:
+            pk = dictionary['public_key']
+            print(dictionary)    
+
+ 
+    my_transaction = transaction.create_transaction(MY_NODE.wallet, pk, int(request.form.to_dict()['amount']))
     MY_NODE.broadcast_transaction(my_transaction)
 
 
@@ -159,17 +177,20 @@ def add_to_ring():
     first_transaction = transaction.create_transaction(MY_NODE.wallet, request.form.to_dict()['public_key'], 100)
     
     print("Pickle'ing the first_transaction object")
-    pickle = jsonpickle.encode(first_transaction)
-    print(pickle)
+    transaction_pickle = jsonpickle.encode(first_transaction)
+    print(transaction_pickle)
+
+    print("Pickle'ing the wallet")
+    wallet_pickle = jsonpickle.encode(MY_NODE.wallet)
 
     print("Sending transaction to: ")
     print("http://" + request.remote_addr + ":5000/incoming_transaction")
-    r = requests.post("http://" + request.remote_addr + ":5000/incoming_transaction", data={'transaction': pickle, 'wallet': MY_NODE.wallet})
+    r = requests.post("http://" + request.remote_addr + ":5000/incoming_transaction", data={'transaction': transaction_pickle, 'wallet': wallet_pickle})
     print("Returned with answer: ")
     print(r)
     print(r.text)
 
-    if next_id == NETWORK_SIZE:
+    if next_id == 3:
         broadcast_info()
         print("Broadcast successful!")
     

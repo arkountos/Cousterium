@@ -12,7 +12,7 @@ from time import time
 from urllib.parse import urlparse
 from uuid import uuid4
 
-utxos = {}
+
 
 class Wallet:
 
@@ -22,8 +22,8 @@ class Wallet:
 		keys = self.generate_RSA()
 		self.public_key = keys[0]
 		self.private_key = keys[1]
-
-		utxos[self.public_key] = []
+		self.utxos = []
+		self.utxos[self.public_key] = []
 
 		self.address = address
 		self.transactions = transactions

@@ -35,14 +35,14 @@ def validate_transaction(sender_wallet,my_transaction):
 	t = my_transaction
 	print("t is ")
 	print(t)
-	w = sender_wallet
+	#w = sender_wallet
 	if not verify_signature(t):
 		raise Exception('Verification failure')
 	
 	#This was:
 	#sender_utxos = sender_wallet.utxos[w.get_public_key()].copy()
 	# And i changed it to:
-	sender_utxos = wallet.utxos[w.get_public_key()].copy()
+	sender_utxos = wallet.utxos[sender_wallet.get_public_key()].copy()
 	balance = w.balance()
 
 	if balance < t.amount:
