@@ -9,7 +9,7 @@ class Blockchain:
         self.chain = []
 
     def create_genesis_block(self):
-        genesis_block = Block(0,1,'placeholder',[])
+        genesis_block = block.Block(0,1,'placeholder',[])
         genesis_block.current_hash = genesis_block.myHash()
         self.chain.append(genesis_block)
         
@@ -43,3 +43,10 @@ class Blockchain:
 
     def last_block(self):
         return self.chain[-1]
+
+    def view_transactions(self):
+        #prints the transactions of the last block
+        last_transactions = self.last_block().listOfTransactions
+        for i in range(len(last_transactions)):
+            print(last_transactions[i])
+        
