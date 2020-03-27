@@ -68,10 +68,6 @@ def create_transaction(mywallet, recipient, amount):
     }]
 
     #wallet.utxos[mywallet.get_public_key()] = [t.outputs[0]]
-    #if recipient not in wallet.utxos.keys():	
-    #    wallet.utxos[recipient] = [t.outputs[1]]
-    #else:
-    #    wallet.utxos[recipient].append(t.outputs[1])
 
     #mywallet.transactions.append(t)
      

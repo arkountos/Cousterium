@@ -22,7 +22,7 @@ class Wallet:
 		keys = self.generate_RSA()
 		self.public_key = keys[0]
 		self.private_key = keys[1]
-		self.utxos = []
+		self.utxos = {}
 		self.utxos[self.public_key] = []
 
 		self.address = address

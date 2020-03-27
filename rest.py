@@ -16,8 +16,8 @@ def setup_bootstrap_node():
     # Create the very first node
     # The node constructor also creates the Wallet() we need and binds it to the node (I hope)
     myNode = node.Node(0, MY_ADDRESS)
-    print(myNode)
-
+    myNode.ring.append({'ip': get_my_ip(), 'id': 1, 'public_key': myNode.wallet.get_public_key()})
+    
     # Create the genesis block with id = 0 and prev_hash = -1
     genesis_block = block.Block(0, -1, [], []) # TODO: we shouldn't have to pass emtpy list as listOfTransactions in constructor, see with peppas
 
@@ -41,6 +41,22 @@ def create_regular_node():
     # Create node and associate with VM via address
     myNode = node.Node(0, MY_ADDRESS)
 
+    r = requests.get("http://" + SERVER_ADDRESS + ":5000/get_bootstrap_utxo")
+    print(r.text)
+    my_utxos = jsonpickle.decode(r.text)
+    print(type(my_utxos))
+    
+    print("BEFORE:")
+    print(myNode.wallet.utxos)
+
+    for key in my_utxos.keys():
+        if key not in myNode.wallet.utxos.keys():
+            myNode.wallet.utxos[key] = my_utxos[key]
+            #myNode.wallet.utxos = my_utxos.copy()
+    
+    print("AFTER")
+    print(myNode.wallet.utxos)
+ 
     print("I RETURN: ")
     print((myNode is None))
     return(myNode)
@@ -57,11 +73,6 @@ def setup():
     # Set node id to the id you got on the response
     MY_NODE.set_id(r.text)
     #print("MY_NODE IS: ", myNode)
-
-    r = requests.get("http://" + SERVER_ADDRESS + ":5000/get_bootstrap_utxo")
-    print(r.text)
-    my_utxos = jsonpickle.decode(r.text)
-    print(type(my_utxos)) 
     
 
 
@@ -139,11 +150,18 @@ def incoming_transaction():
     pickle_transaction = request.form.to_dict()['transaction']
     pickle_wallet = request.form.to_dict()['wallet']
     my_transaction = jsonpickle.decode(pickle_transaction)
-    my_wallet = jsonpickle.decode(pickle_wallet)
-    if (node.validate_transaction(my_wallet, my_transaction)):
+    incoming_wallet = jsonpickle.decode(pickle_wallet)
+    print("WALLET BEFORE")
+    print("WHO AM I???")
+    print(get_my_ip())
+    print(MY_NODE.wallet.utxos)
+    if (node.validate_transaction(incoming_wallet, my_transaction, MY_NODE.wallet)):
         #If here we broadcast utxo to everyone
+        # Update the sender utxos
         pass
-
+    print("WALLET AFTER")
+    print(MY_NODE.wallet.utxos)
+    return("OK")
 
 
 @app.route('/send_money', methods=['POST'])
@@ -174,8 +192,12 @@ def add_to_ring():
     MY_NODE.ring.append({'id': next_id, 'ip':request.remote_addr, 'public_key':request.form.to_dict()['public_key']})
     
     ### GIVE HIM 100 NBC ###
+    print("Bootstrap WALLET BEFORE CREATE FIRST TRANSACTION: ")
+    print(MY_NODE.wallet.utxos)
     first_transaction = transaction.create_transaction(MY_NODE.wallet, request.form.to_dict()['public_key'], 100)
     
+    print("Bootstrap WALLET AFTER FIRST TRANSACTION: ")
+    print(MY_NODE.wallet.utxos)
     print("Pickle'ing the first_transaction object")
     transaction_pickle = jsonpickle.encode(first_transaction)
     print(transaction_pickle)
@@ -183,14 +205,16 @@ def add_to_ring():
     print("Pickle'ing the wallet")
     wallet_pickle = jsonpickle.encode(MY_NODE.wallet)
 
+
+    # remote_addr is getting the same transaction twice!(?)
     print("Sending transaction to: ")
     print("http://" + request.remote_addr + ":5000/incoming_transaction")
-    r = requests.post("http://" + request.remote_addr + ":5000/incoming_transaction", data={'transaction': transaction_pickle, 'wallet': wallet_pickle})
-    print("Returned with answer: ")
-    print(r)
-    print(r.text)
-
-    if next_id == 3:
+    #r = requests.post("http://" + request.remote_addr + ":5000/incoming_transaction", data={'transaction': transaction_pickle, 'wallet': wallet_pickle})
+    #print("Returned with answer: ")
+    #print(r)
+    #print(r.text)
+    MY_NODE.broadcast_transaction(first_transaction)
+    if next_id == 4:
         broadcast_info()
         print("Broadcast successful!")
     

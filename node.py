@@ -28,10 +28,12 @@ def verify_signature(my_transaction):
 	#	return False
 
 
-def validate_transaction(sender_wallet,my_transaction):
+def validate_transaction(sender_wallet,my_transaction, my_wallet):
 	# sender_wallet : Is a wallet Object
 	# my_transaction : The transaction to be validated
 	# use of signature and NBCs balance
+	print("My_wallet at start of validate is: ")
+	print(my_wallet.utxos)
 	print("my_transaction is: ")
 	print(my_transaction)
 	t = my_transaction
@@ -45,22 +47,37 @@ def validate_transaction(sender_wallet,my_transaction):
 	#sender_utxos = sender_wallet.utxos[w.get_public_key()].copy()
 	# And i changed it to:
 	sender_utxos = sender_wallet.utxos[sender_wallet.get_public_key()].copy()
-	balance = sender_wallet.balance()
+	balance = sender_wallet.calculate_balance()
 
 	if balance < t.amount:
 		raise Exception('Ftwxe')
 
 	#Check if inputs are utxos
 	for tid in t.inputs:
+		print("tid is: ")
+		print(tid)
+		# tid = {'a': hs, ...}
 		c = False
 		for utxo in sender_utxos:
-			if tid == utxo['id'] and utxo['who'] == t.sender:
+			#sender_utxo = {[], []}
+			print("sender_utxo is: ")
+			print(sender_utxos)
+			print("utxo is")
+			print(utxo)
+			print("utxo['who']")
+			print(utxo['who'])
+			print("t.sender is: ")
+			print(t.sender)
+			#if tid['id'] == utxo['id'] and utxo['who'] == t.sender:
+			if tid['id'] == utxo['id']:
 				c = True
-				sender_utxos.remove(utxo)
+				print("my_wallet.utxos is:")
+				print(my_wallet.utxos)
+				my_wallet.utxos[t.sender].remove(utxo)
 				break
 
-		if not c:
-			raise Exception('Input not utxo')
+	if not c:
+		raise Exception('Input not utxo')
 
 	t.outputs = [{
 		'id': t.index,
@@ -72,11 +89,15 @@ def validate_transaction(sender_wallet,my_transaction):
 		'amount': t.amount
 	}]
 
-	sender_wallet.utxos[t.sender].append(t.outputs[0])
-	sender_wallet.utxos[t.recipient].append(t.outputs[1])
-	sender_wallet.transactions.append(t)
+	if t.recipient not in my_wallet.utxos.keys():	
+		my_wallet.utxos[t.recipient] = [t.outputs[1]]
+	else:
+		my_wallet.utxos[t.recipient].append(t.outputs[1])
+	my_wallet.utxos[t.sender].append(t.outputs[0])
+	#sender_wallet.utxos[t.recipient].append(t.outputs[1])
+	my_wallet.transactions.append(t)
 	
-	
+	# send back 'sender.wallet.utxos'	
 	
 	return True
 
@@ -118,12 +139,21 @@ class Node:
 
 	def broadcast_transaction(self, my_transaction):
 		print("In broadcast_transaction")
+		print("SELF.RING: ##############")
+		print(self.ring)
+		my_transaction_pickle = jsonpickle.encode(my_transaction)
+		my_wallet_pickle = jsonpickle.encode(self.wallet)
 		for dictionary in self.ring:
 			# Send the transaction to every ip in node.ring
+			print("SENDING TO (FROM BROADCAST_TRANSACTION)")
 			print(dictionary['ip'])
 			url = "http://" + dictionary['ip'] + ":5000/incoming_transaction"
-			my_transaction_pickle = jsonpickle.encode(my_transaction)
-			requests.post(url, data = {'transaction': my_transaction, 'wallet': self.wallet})
+			print("BROADCASTING TRANSACTION TO: ")
+			print(url)
+			print("WALLET IN BROADCAST BEFORE POST")
+			print(self.wallet.utxos)
+			r = requests.post(url, data = {'transaction': my_transaction_pickle, 'wallet': my_wallet_pickle})
+			print(r)
 
 
 	def add_transaction_to_block(self, transaction):
