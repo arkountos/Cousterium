@@ -235,6 +235,15 @@ def get_balance():
 
 
 
+@app.route('/get_balance', methods=['GET'])
+def get_balance():
+    result = MY_NODE.wallet.calculate_balance()
+    print(result)
+    print(type(result))
+    return(result)
+
+
+
 @app.route('/test', methods=['GET'])
 def test():
     print('Address: ' + json.dumps(MY_ADDRESS))
