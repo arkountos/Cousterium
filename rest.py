@@ -33,7 +33,9 @@ def setup_bootstrap_node():
     if not myNode.chain.add_block(genesis_block, 0, True):
         raise Exception('genesis not added')
 
-    next_block = myNode.create_new_block(myNode.chain.last_block().current_hash, 5)
+    myNode.current_block = myNode.create_new_block(myNode.chain.last_block().current_hash, 5)
+    print("current_block")
+    print(myNode.current_block)
 
     print("Chain: ")
     print(myNode.chain.last_block())
@@ -166,11 +168,15 @@ def incoming_transaction():
     print(get_my_ip())
     print(MY_NODE.wallet.utxos)
     if (node.validate_transaction(incoming_wallet, my_transaction, MY_NODE.wallet)):
-        #If here we broadcast utxo to everyone
         # Update the sender utxos
-        pass
+        # IF validated add transaction to block
+        print(my_transaction)
+        MY_NODE.add_transaction_to_block(my_transaction)
+        print(MY_NODE.current_block)
+
     print("WALLET AFTER")
     print(MY_NODE.wallet.utxos)
+    
     return("OK")
 
 

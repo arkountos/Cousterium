@@ -168,13 +168,14 @@ class Node:
 
 	def add_transaction_to_block(self, transaction):
 		#if enough transactions  mine, then create new block
+		print("current block in add_trans_to_block")
+		print(self.current_block)
 		capacity = self.current_block.capacity
 		self.current_block.add_transaction(transaction)
 		if(len(self.current_block.listOfTransactions) == capacity):
-				print("Block is ready for mining")
-				self.mine_block(self.current_block)
-		self.current_block = self.create_new_block(self.current_block.id + 1, self.current_block.current_hash, self.current_block.capacity, self.current_block.difficulty)
-		pass
+			print("Block is ready for mining")
+			#self.mine_block(self.current_block)
+			#self.current_block = self.create_new_block(self.current_block.id + 1, self.current_block.current_hash, self.current_block.capacity, self.current_block.difficulty)
 
 
 
