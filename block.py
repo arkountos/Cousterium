@@ -1,32 +1,35 @@
 # Should import blockchain?
 # import blockchain
 import datetime
-from hashlib import sha256
 import json
-capacity = 10 
+from Crypto.Hash import SHA256
+import jsonpickle
 
 class Block:
-	def __init__(self, id, previousHash, capacity, difficulty, listOfTransactions=[], current_hash=None, nonce=0):
+	def __init__(self, id, previousHash, listOfTransactions=[], current_hash=None, nonce=0):
 		##set
 		# nonce = 0 only if we dont give any argument 
 		self.id = id
 		self.previousHash = previousHash
-		self.timestamp = datetime.datetime.utcnow()
+		self.timestamp = str(datetime.datetime.utcnow())
 		self.current_hash = current_hash   
 		self.nonce = nonce 
-		self.capacity = capacity
-		self.difficulty = difficulty
+		self.capacity = 5
+		self.difficulty = 5
 		self.listOfTransactions = listOfTransactions
 
 	def myHash(self):
-		return (sha256.new(self.dump().encode()).hexdigest())
+		return (SHA256.new(self.dump().encode()).hexdigest())
 
 	def add_transaction(self, transaction):
-		if len(self.listOfTransactions) < capacity:
+		if len(self.listOfTransactions) < self.capacity:
+			print("In add_transaction if: ")
+			print(self.listOfTransactions)
 			self.listOfTransactions.append(transaction)
-		pass
+			print(self.listOfTransactions)
 
 	def dump(self):
 		# Structure with trans, nonce, timestamp to use them in calculation of hash
-		return json.dumps(dict(transactions=self.transactions,nonce=self.nonce,timestamp=self.timestamp), sort_keys=True)
+		transactions_pickle = jsonpickle.encode(self.listOfTransactions)
+		return json.dumps(dict(transactions=transactions_pickle,nonce=self.nonce,timestamp=self.timestamp), sort_keys=True)
 

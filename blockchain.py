@@ -8,11 +8,7 @@ class Blockchain:
     def __init__(self):
         self.chain = []
 
-    def create_genesis_block(self):
-        genesis_block = block.Block(0,1,'placeholder',[])
-        genesis_block.current_hash = genesis_block.myHash()
-        self.chain.append(genesis_block)
-        
+      
     def proof_of_work(self, block):
         block.nonce = 0
         current_hash = block.myHash()
@@ -26,7 +22,13 @@ class Blockchain:
     def is_valid_proof(self, block, block_hash):
         return (block_hash.startswith('0' * Blockchain.difficulty) and block_hash == block.compute_hash())
 
-    def add_block(self, block, proof):
+    def add_block(self, block, proof, is_genesis=False):
+	
+
+        if (is_genesis == True):
+                block.current_hash = block.myHash()
+                self.chain.append(block)
+                return True
 
         previousHash = self.last_block().previousHash
 

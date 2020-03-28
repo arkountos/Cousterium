@@ -28,9 +28,15 @@ def setup_bootstrap_node():
     #first_transaction = transaction.Transaction( sender=0, recipient=MY_ADDRESS, amount=NETWORK_SIZE * 100, inputs=[])
     # TODO: Use transaction.genesis_transaction
     genesis_block.add_transaction(first_transaction)
-
+    print(genesis_block.listOfTransactions)
     # Add the first block to the node's blockchain
-    myNode.chain.append(genesis_block)
+    if not myNode.chain.add_block(genesis_block, 0, True):
+        raise Exception('genesis not added')
+
+    next_block = myNode.create_new_block(myNode.chain.last_block().current_hash, 5)
+
+    print("Chain: ")
+    print(myNode.chain.last_block())
     print("Bootstrap node has: ")
     print(myNode.wallet.calculate_balance())
     # Return the node

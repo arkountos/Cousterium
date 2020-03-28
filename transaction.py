@@ -38,7 +38,7 @@ def genesis_transaction(mywallet, participants):
     print(mywallet.utxos[mywallet.get_public_key()])
     mywallet.transactions.append(t)
 
-    return True
+    return t
 
 
 # possible use of copy for dicitonaries  

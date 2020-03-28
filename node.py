@@ -1,6 +1,7 @@
 import transaction
 import block
 import wallet
+import blockchain
 import Crypto
 import Crypto.Random
 from Crypto.Hash import SHA384
@@ -109,22 +110,31 @@ class Node:
 	# FIVOS
 	# Only one node is running on each VM. Each node only has one wallet.
 
-	def __init__(self, address, current_block=None, node_id=0, chain=[], NBC=0, ring=[]):
+	def __init__(self, address, chain, current_block=None, node_id=0, NBC=0, ring=[]):
 		##set
 
-		self.chain = chain
+		self.chain = blockchain.Blockchain()
 		self.id = node_id
 		self.NBC = NBC		
 		self.address = address # Address is a string
 		self.wallet = self.create_wallet()
 		self.ring = ring  #here we store information for every node, as its id, its address (ip:port) its public key and its balance 
 		self.current_block = current_block
+		self.block_ids = 1
 
 	def set_id(self, id):
 		self.id = id
 
-	def create_new_block(self, id, previousHash, capacity, difficulty):
-		return block.Block(id, previousHash, capacity, difficulty)		
+	def create_genesis_block(self):
+		genesis_block = block.Block(0, -1)
+		genesis_block.current_hash = genesis_block.myHash() 
+		
+
+	def create_new_block(self, previousHash, capacity):
+		myid = self.block_ids
+		result = block.Block(myid, previousHash, capacity)
+		self.block_ids += 1
+		return(result)
 
 	def create_wallet(self):
 		#create a wallet for this node, with a public key and a private key
