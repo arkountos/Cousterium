@@ -34,6 +34,12 @@ def t(id, amount):
     r = requests.post(url, data={'ip': addresses.global_addresses[id], 'amount': amount})
     print(r)
 
+@click.command()
+def balance():
+    r = requests.get("http://" + get_my_ip() + ":5000/get_balance")
+    print("Your wallet has " + r.text + " NBCs")
+
+cli.add_command(balance)
 cli.add_command(hello)
 cli.add_command(connect)
 cli.add_command(t)
