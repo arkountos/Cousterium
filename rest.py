@@ -84,9 +84,11 @@ def broadcast_info():
     print("RING: ")
     print(MY_NODE.ring)
     #print("BROADCASTING TO: " +  "http://" + data_line['ip'] + ":5000/test")
+    ring_pickle = jsonpickle.encode(MY_NODE.ring)
     for entry in MY_NODE.ring:
         print("TO: ", "http://" + entry['ip'] + ":5000/add_to_client_ring")
-        r = requests.post("http://" + entry['ip'] + ":5000/add_to_client_ring", data=MY_NODE.ring)
+        # TODO: ** Maybe we have to jsonpickle? **
+        r = requests.post("http://" + entry['ip'] + ":5000/add_to_client_ring", data={'ring':ring_pickle})
         
 
 
@@ -119,14 +121,16 @@ else:
 
 @app.route('/add_to_client_ring', methods=['POST', 'GET'])
 def add_to_client_ring():
-    print("This has to be a dict")
-    print(request.form.to_dict())
-    MY_NODE.ring.append(request.form.to_dict())
+    
+    incoming_ring = request.form.to_dict()['ring']
+    new_ring = jsonpickle.decode(incoming_ring)
+    
+    MY_NODE.ring = new_ring
     print("Node with id ")
     print(MY_NODE.id)
-    print(" has ring: ")
+    print(" has new ring: ")
     print(MY_NODE.ring)
-    MY_NODE.wallet.utxos[request.form.to_dict()['public_key']] = []
+    #MY_NODE.wallet.utxos[request.form.to_dict()['public_key']] = []
     print("The node's utxos")
     print(MY_NODE.wallet.utxos)
     return("OK!")
@@ -214,7 +218,7 @@ def add_to_ring():
     #print(r)
     #print(r.text)
     MY_NODE.broadcast_transaction(first_transaction)
-    if next_id == 4:
+    if next_id == NETWORK_SIZE:
         broadcast_info()
         print("Broadcast successful!")
     
