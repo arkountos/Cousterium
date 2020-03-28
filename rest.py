@@ -186,7 +186,7 @@ def send_money():
  
     my_transaction = transaction.create_transaction(MY_NODE.wallet, pk, int(request.form.to_dict()['amount']))
     MY_NODE.broadcast_transaction(my_transaction)
-
+    return("Sending the money...")
 
 
 # Add the calling node to the ring
@@ -231,16 +231,7 @@ def get_balance():
     result = MY_NODE.wallet.calculate_balance()
     print(result)
     print(type(result))
-    return(result)
-
-
-
-@app.route('/get_balance', methods=['GET'])
-def get_balance():
-    result = MY_NODE.wallet.calculate_balance()
-    print(result)
-    print(type(result))
-    return(result)
+    return(str(result))
 
 
 
