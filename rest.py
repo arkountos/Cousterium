@@ -30,9 +30,9 @@ def setup_bootstrap_node():
     genesis_block.add_transaction(first_transaction)
     print(genesis_block.listOfTransactions)
     # Add the first block to the node's blockchain
-    if not myNode.chain.add_block(genesis_block, 0, True):
+    if not myNode.chain.add_block(genesis_block):
         raise Exception('genesis not added')
-
+    myNode.address = MY_ADDRESS
     myNode.current_block = myNode.create_new_block(myNode.chain.last_block().current_hash)
     print("current_block")
     print(myNode.current_block)
@@ -48,6 +48,7 @@ def setup_bootstrap_node():
 def create_regular_node():
     # Create node and associate with VM via address
     myNode = node.Node(0, MY_ADDRESS)
+    myNode.address = MY_ADDRESS
 
     r = requests.get("http://" + SERVER_ADDRESS + ":5000/get_bootstrap_utxo")
     print(r.text)
@@ -146,11 +147,11 @@ def add_to_client_ring():
     print(MY_NODE.ring)
 
     print("CHAINZ BEFORE:")
-    print(MY_NODE.chain)
+    print(MY_NODE.chain.print_chain())
     MY_NODE.chain = new_blockchain
 
     print("CHAINZ AFTER:")
-    print(MY_NODE.chain)
+    print(MY_NODE.chain.print_chain())
     
     #MY_NODE.wallet.utxos[request.form.to_dict()['public_key']] = []
     print("The node's utxos")
@@ -192,6 +193,14 @@ def incoming_transaction():
     print(MY_NODE.wallet.utxos)
     
     return("OK")
+
+
+@app.route('/incoming_block', methods=['POST'])
+def incoming_block():
+    new_block = jsonpickle.decode(request.form.to_dict()['block'])
+    MY_NODE.validate_block(new_block)
+    MY_NODE.chain.print_chain()
+    return("Block Added!")
 
 
 @app.route('/send_money', methods=['POST'])
@@ -259,10 +268,16 @@ def get_balance():
     print(type(result))
     return(str(result))
 
-
+@app.route('/start_mining', methods=['GET', 'POST'])
+def start_mining():
+    incoming_block = jsonpickle.decode(request.form.to_dict()['block'])
+    result_hash = MY_NODE.mine_block(incoming_block)
+    return(str(result_hash))
 
 @app.route('/test', methods=['GET'])
 def test():
+    while True:
+        pass
     print('Address: ' + json.dumps(MY_ADDRESS))
     return('Address: ' + json.dumps(MY_ADDRESS))
 

@@ -121,6 +121,7 @@ class Node:
 		self.ring = ring  #here we store information for every node, as its id, its address (ip:port) its public key and its balance 
 		self.current_block = current_block
 		self.block_ids = 1
+		self.difficulty = 2
 
 	def set_id(self, myid):
 		self.id = myid
@@ -172,28 +173,76 @@ class Node:
 		print(self.current_block)
 		capacity = self.current_block.capacity
 		print(self.current_block.listOfTransactions)
+		
 		self.current_block.add_transaction(transaction)
-		if(len(self.current_block.listOfTransactions) == capacity):
-			print("Block is ready for mining")
-			temp_current_block = self.current_block
-			self.current_block = self.create_new_block()
-			#self.mine_block(self.current_block)
-			#self.current_block = self.create_new_block(self.current_block.id + 1, self.current_block.current_hash, self.current_block.capacity, self.current_block.difficulty)
+		if (self.check_capacity() == True):
+			return True
+		else:
+			self.mine_handler()
+			
+	def check_capacity(self):
+		if(len(self.current_block.listOfTransactions) == self.current_block.capacity):
+			return False
+		else:
+			return True
+
+	def mine_handler(self):
+		print("Block is ready for mining")
+		temp_current_block = self.current_block
+		block_pickle = jsonpickle.encode(temp_current_block)
+		self.current_block = self.create_new_block()
+		# Send the current block to be mined!
+		print(self.address)
+		r = requests.post("http://" + str(self.address) + ":5000/start_mining", data={'block':block_pickle})
+		temp_current_block.current_hash = r.text
+		self.broadcast_block(temp_current_block)
 
 
-
-	def mine_block():
-		pass
-
-
-
-	def broadcast_block():
-		pass
-
-
+	def mine_block(self, current_block):
+		result_hash = self.proof_of_work(current_block)
+		return(result_hash)
 		
 
-	# def valid_proof(.., difficulty=MINING_DIFFICULTY):
+
+	def broadcast_block(self, myblock):
+		block_pickle = jsonpickle.encode(myblock)
+		for entry in self.ring:
+			r = requests.post("http://" + entry['ip'] + ":5000/incoming_block", data={'block': block_pickle})
+
+
+	def proof_of_work(self, myblock):
+		myblock.nonce = 0
+		current_hash = myblock.myHash()
+
+		while not current_hash.startswith('0' * self.difficulty):
+			print(current_hash)
+			print("##################################################################################")
+			myblock.nonce += 1
+			current_hash = myblock.myHash()
+
+		return current_hash
+
+
+	def validate_block(self, myblock):
+		if (self.is_valid_proof(myblock)):
+			print("Valid proof!")
+			if (self.chain.last_block().current_hash == myblock.previousHash):
+				print("correct prevhash!")
+				self.chain.add_block(myblock)
+				return True
+		else:
+			print("Wrong something")
+			return False
+
+
+	def is_valid_proof(self, myblock):
+		print("myblock.current_hash is:")
+		print(myblock.current_hash)
+		
+		return (myblock.current_hash.startswith('0' * self.difficulty))
+
+
+	#valid_proof(.., difficulty=MINING_DIFFICULTY):
 	# 	pass
 
 

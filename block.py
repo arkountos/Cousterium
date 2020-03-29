@@ -15,7 +15,6 @@ class Block:
 		self.current_hash = current_hash   
 		self.nonce = nonce 
 		self.capacity = 5
-		self.difficulty = 5
 		self.listOfTransactions = listOfTransactions
 
 	def myHash(self):
