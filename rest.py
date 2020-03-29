@@ -19,7 +19,7 @@ def setup_bootstrap_node():
     myNode.ring.append({'ip': get_my_ip(), 'id': 1, 'public_key': myNode.wallet.get_public_key()})
     
     # Create the genesis block with id = 0 and prev_hash = -1
-    genesis_block = block.Block(0, -1, [], []) # TODO: we shouldn't have to pass emtpy list as listOfTransactions in constructor, see with peppas
+    genesis_block = block.Block(0, -1, []) # TODO: we shouldn't have to pass emtpy list as listOfTransactions in constructor, see with peppas
 
     # Need to add the first and only transaction to the genesis block
     #print("The bootstrap node's wallet private key is ")
@@ -33,7 +33,7 @@ def setup_bootstrap_node():
     if not myNode.chain.add_block(genesis_block, 0, True):
         raise Exception('genesis not added')
 
-    myNode.current_block = myNode.create_new_block(myNode.chain.last_block().current_hash, 5)
+    myNode.current_block = myNode.create_new_block(myNode.chain.last_block().current_hash)
     print("current_block")
     print(myNode.current_block)
 
@@ -64,6 +64,8 @@ def create_regular_node():
     
     print("AFTER")
     print(myNode.wallet.utxos)
+
+    myNode.current_block = myNode.create_new_block()
  
     print("I RETURN: ")
     print((myNode is None))
@@ -85,18 +87,19 @@ def setup():
 
 
 
-# A function to broadcast the ring information to all the nodes,
-# when every node joins the system.
+# A function to broadcast the ring information and his blockchain 
+#to all the nodes, when every node joins the system.
 # This is only run from the bootstrap node
 def broadcast_info():
     print("RING: ")
     print(MY_NODE.ring)
     #print("BROADCASTING TO: " +  "http://" + data_line['ip'] + ":5000/test")
     ring_pickle = jsonpickle.encode(MY_NODE.ring)
+    blockchain_pickle = jsonpickle.encode(MY_NODE.chain)
     for entry in MY_NODE.ring:
         print("TO: ", "http://" + entry['ip'] + ":5000/add_to_client_ring")
         # TODO: ** Maybe we have to jsonpickle? **
-        r = requests.post("http://" + entry['ip'] + ":5000/add_to_client_ring", data={'ring':ring_pickle})
+        r = requests.post("http://" + entry['ip'] + ":5000/add_to_client_ring", data={'ring':ring_pickle, 'blockchain': blockchain_pickle})
         
 
 
@@ -132,12 +135,23 @@ def add_to_client_ring():
     
     incoming_ring = request.form.to_dict()['ring']
     new_ring = jsonpickle.decode(incoming_ring)
+
+    incoming_blockchain = request.form.to_dict()['blockchain']
+    new_blockchain = jsonpickle.decode(incoming_blockchain)
     
     MY_NODE.ring = new_ring
     print("Node with id ")
     print(MY_NODE.id)
     print(" has new ring: ")
     print(MY_NODE.ring)
+
+    print("CHAINZ BEFORE:")
+    print(MY_NODE.chain)
+    MY_NODE.chain = new_blockchain
+
+    print("CHAINZ AFTER:")
+    print(MY_NODE.chain)
+    
     #MY_NODE.wallet.utxos[request.form.to_dict()['public_key']] = []
     print("The node's utxos")
     print(MY_NODE.wallet.utxos)
@@ -230,7 +244,7 @@ def add_to_ring():
     #print(r)
     #print(r.text)
     MY_NODE.broadcast_transaction(first_transaction)
-    if next_id == NETWORK_SIZE:
+    if next_id == 2:
         broadcast_info()
         print("Broadcast successful!")
     

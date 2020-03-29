@@ -122,17 +122,17 @@ class Node:
 		self.current_block = current_block
 		self.block_ids = 1
 
-	def set_id(self, id):
-		self.id = id
+	def set_id(self, myid):
+		self.id = myid
 
 	def create_genesis_block(self):
 		genesis_block = block.Block(0, -1)
 		genesis_block.current_hash = genesis_block.myHash() 
 		
 
-	def create_new_block(self, previousHash, capacity):
+	def create_new_block(self, prevHash=0):
 		myid = self.block_ids
-		result = block.Block(myid, previousHash, capacity)
+		result = block.Block(myid, prevHash)
 		self.block_ids += 1
 		return(result)
 
@@ -171,9 +171,12 @@ class Node:
 		print("current block in add_trans_to_block")
 		print(self.current_block)
 		capacity = self.current_block.capacity
+		print(self.current_block.listOfTransactions)
 		self.current_block.add_transaction(transaction)
 		if(len(self.current_block.listOfTransactions) == capacity):
 			print("Block is ready for mining")
+			temp_current_block = self.current_block
+			self.current_block = self.create_new_block()
 			#self.mine_block(self.current_block)
 			#self.current_block = self.create_new_block(self.current_block.id + 1, self.current_block.current_hash, self.current_block.capacity, self.current_block.difficulty)
 

@@ -6,10 +6,10 @@ from Crypto.Hash import SHA256
 import jsonpickle
 
 class Block:
-	def __init__(self, id, previousHash, listOfTransactions=[], current_hash=None, nonce=0):
+	def __init__(self, myid, previousHash=0, listOfTransactions=[], current_hash=None, nonce=0):
 		##set
 		# nonce = 0 only if we dont give any argument 
-		self.id = id
+		self.myid = myid
 		self.previousHash = previousHash
 		self.timestamp = str(datetime.datetime.utcnow())
 		self.current_hash = current_hash   
