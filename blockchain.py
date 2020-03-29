@@ -52,3 +52,16 @@ class Blockchain:
         for i in range(len(last_transactions)):
             print(last_transactions[i])
         
+    def print_chain(self):
+        i = 0
+        for bentry in self.chain:
+            print('=======')
+            print("Block ", i)
+            transactions = bentry.listOfTransactions
+            j = 0
+            print("------------")
+            for tentry in transactions:
+                print(j,': ',tentry.index)
+                j +=1
+            i += 1
+                    
