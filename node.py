@@ -14,10 +14,10 @@ import requests
 
 def verify_signature(my_transaction):
 	#receiver node verifies signature of sender node
-	signature = my_transaction.signature
-	h = SHA384.new(json.dumps(my_transaction.to_dict()).encode()).hexdigest()
-	public_key = my_transaction.sender
+	p_key = RSA.importKey(my_transaction.sender_private_key)
 	verifier = PKCS1_v1_5.new(public_key)
+	myhash = SHA384.new(json.dumps(my_transaction.to_dict()).encode())
+	return verifier.verify(myhash, base64.b64decode(my_transaction.signature))
 	
 	# TODO: FOR NOW, RETURN TRUE (see below)
 	return True
