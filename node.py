@@ -121,7 +121,7 @@ class Node:
 		self.ring = ring  #here we store information for every node, as its id, its address (ip:port) its public key and its balance 
 		self.current_block = current_block
 		self.block_ids = 1
-		self.difficulty = 2
+		self.difficulty = 5
 
 	def set_id(self, myid):
 		self.id = myid
