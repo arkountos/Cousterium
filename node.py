@@ -7,6 +7,7 @@ import Crypto.Random
 from Crypto.Hash import SHA384
 from Crypto.PublicKey import RSA
 from Crypto.Signature import PKCS1_v1_5
+import base64
 import json
 import jsonpickle
 import requests
@@ -14,19 +15,11 @@ import requests
 
 def verify_signature(my_transaction):
 	#receiver node verifies signature of sender node
-	p_key = RSA.importKey(my_transaction.sender_private_key)
-	verifier = PKCS1_v1_5.new(public_key)
-	myhash = SHA384.new(json.dumps(my_transaction.to_dict()).encode())
+	p_key = RSA.importKey(my_transaction.sender.encode())
+	verifier = PKCS1_v1_5.new(p_key)
+	myhash = SHA384.new(my_transaction.to_dict().encode())
+	print("myhash is " + str(myhash))
 	return verifier.verify(myhash, base64.b64decode(my_transaction.signature))
-	
-	# TODO: FOR NOW, RETURN TRUE (see below)
-	return True
-
-	# TODO: There's an error inside if, fix!
-	#if(verifier.verify(h, signature)):
-	#	return True
-	#else:
-	#	return False
 
 
 def validate_transaction(sender_wallet,my_transaction, my_wallet):
