@@ -274,6 +274,11 @@ def start_mining():
     result_hash = MY_NODE.mine_block(incoming_block)
     return(str(result_hash))
 
+@app.route('/send_blockchain', methods=['GET'])
+def send_blockchain():
+    c = jsonpickle.encode(MY_NODE.chain)
+    return(c)
+
 @app.route('/test', methods=['GET'])
 def test():
     while True:

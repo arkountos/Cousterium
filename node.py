@@ -1,3 +1,5 @@
+import addresses
+import ip 
 import transaction
 import block
 import wallet
@@ -223,6 +225,8 @@ class Node:
 				print("correct prevhash!")
 				self.chain.add_block(myblock)
 				return True
+			else:
+				resolve_conflicts()	
 		else:
 			print("Wrong something")
 			return False
@@ -244,13 +248,22 @@ class Node:
 	#concencus functions
 
 	def valid_chain(self, chain):
-		#check for the longer chain accroose all nodes
-		pass
+		for block in chain[1:]
+			if not validate_block(block):
+				raise Exception("Blockchain varification failed")
+		return True
 
 
 	def resolve_conflicts(self):
-		#resolve correct chain
-		pass
+		addr = addresses.global_addresses.copy()
+		del addr[ip.get_my_ip]
+		chains = []
+		for ip in addr:
+			r = request.get('http://', + ip + , '/send_blockchain')
+			c = jsonpickle.decode(r.text)
+			chains.append(c)
+		chains.sort()
+		self.chain = chains[-1]
 
 
 
