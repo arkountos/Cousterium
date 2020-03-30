@@ -88,6 +88,7 @@ class Transaction:
         self.recipient = recipient
         self.amount = amount    
         self.index = index
+        self.timestamp = str(datetime.datetime.utcnow())
         self.inputs = inputs  
         self.signature = signature
         self.outputs = []
@@ -98,7 +99,7 @@ class Transaction:
             'sender': self.sender,
             'recipient': self.recipient,
             'amount': self.amount,
-            'index': self.index})
+            'timestamp': self.timestamp})
 
     def sign_trans(self):
         myhash = SHA384.new(json.dumps(self.to_dict()).encode())
