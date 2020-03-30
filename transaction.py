@@ -95,14 +95,15 @@ class Transaction:
 
     # structure to use all infos as message in signature
     def to_dict(self):
-        return collections.OrderedDict({
-            'sender': self.sender,
-            'recipient': self.recipient,
-            'amount': self.amount,
-            'timestamp': self.timestamp})
+        return json.dumps(dict(
+            sender =  self.sender,
+            recipient = self.recipient,
+            amount = self.amount,
+            timestamp = self.timestamp,
+            ), sort_keys = True)
 
     def sign_trans(self):
-        myhash = SHA384.new(json.dumps(self.to_dict()).encode())
+        myhash = SHA384.new(self.to_dict().encode())
         p_key = RSA.importKey(self.sender_private_key)
         signer = PKCS1_v1_5.new(p_key)
         self.index = myhash.hexdigest()
