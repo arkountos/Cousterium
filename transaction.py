@@ -34,8 +34,8 @@ def genesis_transaction(mywallet, participants):
     }]
 
     mywallet.utxos[mywallet.get_public_key()] = [t.outputs[0]]
-    print("WHAT MOEY DO I HAVE???")
-    print(mywallet.utxos[mywallet.get_public_key()])
+    #print("WHAT MOEY DO I HAVE???")
+    #print(mywallet.utxos[mywallet.get_public_key()])
     mywallet.transactions.append(t)
 
     return t
@@ -71,11 +71,11 @@ def create_transaction(mywallet, recipient, amount):
 
     #mywallet.transactions.append(t)
      
-    print("create_transaction returns (t) : ")
-    print(t)
-    print("of type")
-    print(type(t))
-    print(t.signature)
+    #print("create_transaction returns (t) : ")
+    #print(t)
+    #print("of type")
+    #print(type(t))
+    #print(t.signature)
     return t
 
 class Transaction:

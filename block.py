@@ -22,10 +22,10 @@ class Block:
 
 	def add_transaction(self, transaction):
 		if len(self.listOfTransactions) < self.capacity:
-			print("In add_transaction if: ")
-			print(self.listOfTransactions)
+			#print("In add_transaction if: ")
+			#print(self.listOfTransactions)
 			self.listOfTransactions.append(transaction)
-			print(self.listOfTransactions)
+			#print(self.listOfTransactions)
 
 	def dump(self):
 		# Structure with trans, nonce, timestamp to use them in calculation of hash
