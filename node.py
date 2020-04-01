@@ -171,7 +171,8 @@ class Node:
 		#print(self.current_block)
 		capacity = self.current_block.capacity
 		#print(self.current_block.listOfTransactions)
-		
+		print("I AM IN")
+		print("#########################################")
 		self.current_block.add_transaction(transaction)
 		if (self.check_capacity() == True):
 			return True
@@ -198,7 +199,7 @@ class Node:
 
 	def mine_handler(self, current_block, identifier):
 		result_q = multiprocessing.Queue()
-		p = multiprocessing.Process(name=str(identifier), target=self.mine_block, args=(current_block, result_q,))
+		p = multiprocessing.Process(name=str(identifier), target=self.mine_block, args=(current_block, result_q, identifier,))
 		print("The name of the job i will append is")
 		print(p.name)
 		self.jobs.append(p)
@@ -206,15 +207,39 @@ class Node:
 		print("Jobs list: ")
 		print(self.jobs)
 		print("Waiting to join ...")
-		
+		p.join()
+		print("After join")	
 		print("Inside q in parent we have: ")
 		print(result_q.get())
-		print("Broadcasting stop mining signal...")
-		self.broadcast_stop_mining_and_add_block(identifier)
 
-	
 
-	def mine_block(self, current_block, result_q):
+	def terminate_handler(self, myblock, identifier):
+		# Terminate mining process for given block
+		print("CALLED TO TERMINATE PROCESS: " + str(identifier) + " FOV BLOCK: " + str(myblock))
+		for job in self.jobs:
+			print("Job: ")
+			print(job)
+			print("with name: ")
+			print(job.name)
+			if str(job.name) == str(identifier):
+				print("SUCCESSFULL TERMINATION")
+				print("Calling job.terminate on job: ", job.name)
+				job.terminate()
+				print(self.jobs)
+		# Add given block to blockchain
+		if (self.validate_block(myblock)):
+			print("Block added succesfully to chain!")
+			self.chain.print_chain()
+		else:
+			print("Block didn't validate :\\")
+			self.chain.print_chain()
+
+		print("In the end the jobs table is: ")
+		print(self.jobs)
+		
+			
+
+	def mine_block(self, current_block, result_q, identifier):
 		print("Starting mining on ")
 		print(str(self.address))
 		result_hash = self.proof_of_work(current_block)
@@ -223,7 +248,8 @@ class Node:
 		# Send request to stop others from mining!
 		result_q.put(result_hash)
 		#result_hash = self.proof_of_work(current_block)i
-		
+		current_block.current_hash = result_hash
+		self.broadcast_stop_mining_and_add_block(identifier, current_block)
 		return(result_hash)
 		
 
@@ -235,21 +261,24 @@ class Node:
 			if entry['ip'] == str(self.address):
 				continue	
 			try:
+				print("Block: " + str(myblock) + " to: " + str(entry['ip']))
 				requests.post("http://" + entry['ip'] + ":5000/incoming_block_to_mine", data={'block': block_pickle, 'identifier': str(identifier)}, timeout=0.0001)
 			except requests.exceptions.ReadTimeout:
 				pass
-		requests.post("http://" + str(self.address) + ":5000/incoming_block_to_mine", data={'block': block_pickle}, timeout=0.0001)
+		requests.post("http://" + str(self.address) + ":5000/incoming_block_to_mine", data={'block': block_pickle, 'identifier': str(identifier)}, timeout=0.0001)
 
 
 	def broadcast_stop_mining_and_add_block(self, identifier, myblock):
-		block_pickle = jsonpickle.encode(
+		block_pickle = jsonpickle.encode(myblock)
 		for entry in self.ring:
 			if entry['ip'] == str(self.address):
 				continue
 			try:
-				requests.post("http://" + entry['ip'] + ":5000/stop_mining_and_add_block", data={'identifier': identifier, 'block': })
+				requests.post("http://" + entry['ip'] + ":5000/stop_mining_and_add_block", data={'identifier': identifier, 'block': block_pickle}, timeout = 0.0001)
 			except requests.exceptions.ReadTimeout:
 				pass	
+		requests.post("http://" + str(self.address) + ":5000/stop_mining_and_add_block", data={'identifier': identifier, 'block': block_pickle}, timeout = 0.0001)
+
 
 	def proof_of_work(self, myblock):
 		myblock.nonce = 0
@@ -272,7 +301,8 @@ class Node:
 				self.chain.add_block(myblock)
 				return True
 			else:
-				resolve_conflicts()	
+				print("Calling resolve conflicts")
+				#self.resolve_conflicts()	
 		else:
 			print("Wrong something")
 			return False
@@ -294,7 +324,7 @@ class Node:
 	#concencus functions
 
 	def valid_chain(self, chain):
-		for block in chain[1:]
+		for block in chain[1:]:
 			if not validate_block(block):
 				raise Exception("Blockchain varification failed")
 		return True
@@ -305,7 +335,7 @@ class Node:
 		del addr[ip.get_my_ip]
 		chains = []
 		for ip in addr:
-			r = request.get('http://', + ip + , '/send_blockchain')
+			r = request.get('http://' + ip +  ':5000/send_blockchain')
 			c = jsonpickle.decode(r.text)
 			chains.append(c)
 		chains.sort()

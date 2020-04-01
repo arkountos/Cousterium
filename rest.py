@@ -200,9 +200,18 @@ def incoming_transaction():
 # A block is coming, start mining!
 def incoming_block():
     new_block = jsonpickle.decode(request.form.to_dict()['block'])
-    identifier = request.form.to_dict()['identifier'] 
-    MY_NODE.mine_handler(new_block, identifier)
+    new_identifier = request.form.to_dict()['identifier'] 
+    MY_NODE.mine_handler(new_block, new_identifier)
     return("Return of /incoming_block_to_mine route")
+
+
+@app.route('/stop_mining_and_add_block', methods=['POST'])
+def stop_mining_and_add_block():
+    new_identifier = jsonpickle.decode(request.form.to_dict()['identifier'])
+    new_block = jsonpickle.decode(request.form.to_dict()['block'])
+    print("Incoming request from: " + str(request.remote_addr) + " for block: " + str(new_block))
+    MY_NODE.terminate_handler(new_block, new_identifier)
+    return("Return of /stop_mining_and_add_block route")
 
 
 @app.route('/send_money', methods=['POST'])

@@ -14,8 +14,8 @@ class Block:
 		self.timestamp = str(datetime.datetime.utcnow())
 		self.current_hash = current_hash   
 		self.nonce = nonce 
-		self.capacity = 5
-		self.listOfTransactions = listOfTransactions
+		self.capacity = 4
+		self.listOfTransactions = []
 
 	def myHash(self):
 		return (SHA256.new(self.dump().encode()).hexdigest())
@@ -25,7 +25,7 @@ class Block:
 			#print("In add_transaction if: ")
 			#print(self.listOfTransactions)
 			self.listOfTransactions.append(transaction)
-			#print(self.listOfTransactions)
+			print(len(self.listOfTransactions))
 
 	def dump(self):
 		# Structure with trans, nonce, timestamp to use them in calculation of hash
