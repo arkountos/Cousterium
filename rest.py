@@ -1,6 +1,5 @@
 from flask import Flask, jsonify, request, render_template
 
-import ids
 import random
 import jsonpickle
 import block
@@ -279,24 +278,6 @@ def get_balance():
     print(result)
     print(type(result))
     return(str(result))
-
-@app.route('/view_transactions', methods=['GET'])
-def view_transactions():
-    result = MY_NODE.chain.last_block()
-    result_string = ""
-    # result is 'block'
-    for trans in result.listOfTransactions:
-        for dictionary in MY_NODE.ring:
-       	    if dictionary['public_key'] == trans.sender:
-                sender_result = dictionary['ip']
-            if dictionary['public_key'] == trans.recipient:
-                recipient_result = dictionary['ip']
-        amount_result = trans.amount
-        result_string += ("\nMoved " + str(amount_result) + " NBCs from: " + str(ids.global_ids[sender_result]) + " to: " + str(ids.global_ids[recipient_result]))
-    print("#########")
-
-    #result_string = "Last Transactions: "
-    return(result_string)
 
 #@app.route('/start_mining', methods=['GET', 'POST'])
 #def start_mining():

@@ -1,6 +1,3 @@
-import signal
-import os
-from threading import RLock
 import addresses
 import ip 
 import transaction
@@ -18,7 +15,6 @@ import json
 import jsonpickle
 import requests
 import multiprocessing
-from multiprocessing import Lock, Manager
 
 
 def verify_signature(my_transaction):
@@ -113,7 +109,7 @@ class Node:
 
 	def __init__(self, address, chain, current_block=None, node_id=0, NBC=0, ring=[]):
 		##set
-		
+
 		self.chain = blockchain.Blockchain()
 		self.id = node_id
 		self.NBC = NBC		
@@ -122,7 +118,7 @@ class Node:
 		self.ring = ring  #here we store information for every node, as its id, its address (ip:port) its public key and its balance 
 		self.current_block = current_block
 		self.block_ids = 1
-		self.difficulty = 2
+		self.difficulty = 4
 		self.jobs = []
 
 	def set_id(self, myid):
@@ -202,10 +198,8 @@ class Node:
 
 
 	def mine_handler(self, current_block, identifier):
-		lock = multiprocessing.Lock()
 		result_q = multiprocessing.Queue()
-		#self.chain = multiprocessing.Value("blockchain.Blockchain",0)
-		p = multiprocessing.Process(name=str(identifier), target=self.mine_block, args=(current_block, result_q, identifier,lock))
+		p = multiprocessing.Process(name=str(identifier), target=self.mine_block, args=(current_block, result_q, identifier,))
 		print("The name of the job i will append is")
 		print(p.name)
 		self.jobs.append(p)
@@ -221,16 +215,15 @@ class Node:
 
 	def terminate_handler(self, myblock, identifier):
 		# Terminate mining process for given block
-		print("CALLED TO TERMINATE PROCESS: " + str(identifier) + " FOR BLOCK: " + str(myblock))
+		print("CALLED TO TERMINATE PROCESS: " + str(identifier) + " FOV BLOCK: " + str(myblock))
 		for job in self.jobs:
 			print("Job: ")
 			print(job)
 			print("with name: ")
 			print(job.name)
 			if str(job.name) == str(identifier):
-				print("STARTING TERMINATION")
+				print("SUCCESSFULL TERMINATION")
 				print("Calling job.terminate on job: ", job.name)
-				#os.kill(int(job.pid), signal.SIGKILL)
 				job.terminate()
 				print(self.jobs)
 		# Add given block to blockchain
@@ -246,20 +239,17 @@ class Node:
 		
 			
 
-	def mine_block(self, my_block, result_q, identifier, lock):
-		lock.acquire()
+	def mine_block(self, current_block, result_q, identifier):
 		print("Starting mining on ")
 		print(str(self.address))
-		result_hash = self.proof_of_work(my_block)
+		result_hash = self.proof_of_work(current_block)
 		print("Mining has returned (?) with result_hash: ")
 		print(result_hash)
 		# Send request to stop others from mining!
 		result_q.put(result_hash)
 		#result_hash = self.proof_of_work(current_block)i
-		my_block.current_hash = result_hash
-		my_block.previousHash = self.chain.last_block().current_hash
-		self.broadcast_stop_mining_and_add_block(identifier, my_block)
-		lock.release()
+		current_block.current_hash = result_hash
+		self.broadcast_stop_mining_and_add_block(identifier, current_block)
 		return(result_hash)
 		
 
@@ -287,24 +277,10 @@ class Node:
 				requests.post("http://" + entry['ip'] + ":5000/stop_mining_and_add_block", data={'identifier': identifier, 'block': block_pickle}, timeout = 0.0001)
 			except requests.exceptions.ReadTimeout:
 				pass	
-		# Add given block to blockchain
-		print("=============================================================================================================================")
-		#if (self.validate_block(myblock)):
-		#	print("Block added succesfully to chain!")
-		#	self.chain.print_chain()
-		#else:
-		#	print("Block didn't validate :\\")
-		#	self.chain.print_chain()
-
-		print("In the end the jobs table is: ")
-		print(self.jobs)
 		requests.post("http://" + str(self.address) + ":5000/stop_mining_and_add_block", data={'identifier': identifier, 'block': block_pickle}, timeout = 0.0001)
 
 
 	def proof_of_work(self, myblock):
-		print("Peppas Koustas assembly Begin of mining")
-		#lock = RLock()
-		#with lock:
 		myblock.nonce = 0
 		current_hash = myblock.myHash()
 
@@ -313,7 +289,7 @@ class Node:
 			#print("##################################################################################")
 			myblock.nonce += random.randrange(0, 1000000000)
 			current_hash = myblock.myHash()
-		print("Peppas Koustas deassembly End of mining")
+
 		return current_hash
 
 
@@ -356,13 +332,10 @@ class Node:
 
 	def resolve_conflicts(self):
 		addr = addresses.global_addresses.copy()
-		for i in addr:
-			if addr[i] == ip.get_my_ip():
-				break	
-		del addr[i]
+		del addr[ip.get_my_ip]
 		chains = []
-		for entry in addr:
-			r = requests.get("http://" + entry +  ":5000/send_blockchain")
+		for ip in addr:
+			r = request.get('http://' + ip +  ':5000/send_blockchain')
 			c = jsonpickle.decode(r.text)
 			chains.append(c)
 		chains.sort()
