@@ -201,8 +201,8 @@ def incoming_transaction():
 # A block is coming, start mining!
 def incoming_block():
     new_block = jsonpickle.decode(request.form.to_dict()['block'])
-    new_identifier = request.form.to_dict()['identifier'] 
-    MY_NODE.mine_handler(new_block, new_identifier)
+    #new_identifier = request.form.to_dict()['identifier'] 
+    MY_NODE.validate_block(new_block)
     return("Return of /incoming_block_to_mine route")
 
 

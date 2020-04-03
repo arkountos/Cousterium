@@ -31,23 +31,12 @@ def verify_signature(my_transaction):
 
 
 def validate_transaction(sender_wallet,my_transaction, my_wallet):
-	# sender_wallet : Is a wallet Object
-	# my_transaction : The transaction to be validated
-	# use of signature and NBCs balance
-	#print("My_wallet at start of validate is: ")
-	#print(my_wallet.utxos)
-	#print("my_transaction is: ")
-	#print(my_transaction)
+	
 	t = my_transaction
-	#print("t is ")
-	#print(t)
-	#w = sender_wallet
 	if not verify_signature(t):
 		raise Exception('Verification failure')
 	
-	#This was:
-	#sender_utxos = sender_wallet.utxos[w.get_public_key()].copy()
-	# And i changed it to:
+	
 	sender_utxos = sender_wallet.utxos[sender_wallet.get_public_key()].copy()
 	balance = sender_wallet.calculate_balance()
 
@@ -56,28 +45,12 @@ def validate_transaction(sender_wallet,my_transaction, my_wallet):
 
 	#Check if inputs are utxos
 	for tid in t.inputs:
-		#print("tid is: ")
-		#print(tid)
-		# tid = {'a': hs, ...}
 		c = False
 		for utxo in sender_utxos:
-			#sender_utxo = {[], []}
-			#print("sender_utxo is: ")
-			#print(sender_utxos)
-			#print("utxo is")
-			#print(utxo)
-			#print("utxo['who']")
-			#print(utxo['who'])
-			#print("t.sender is: ")
-			#print(t.sender)
-			#if tid['id'] == utxo['id'] and utxo['who'] == t.sender:
 			if tid['id'] == utxo['id']:
 				c = True
-				#print("my_wallet.utxos is:")
-				#print(my_wallet.utxos)
 				my_wallet.utxos[t.sender].remove(utxo)
 				break
-
 	if not c:
 		raise Exception('Input not utxo')
 
@@ -96,20 +69,11 @@ def validate_transaction(sender_wallet,my_transaction, my_wallet):
 	else:
 		my_wallet.utxos[t.recipient].append(t.outputs[1])
 	my_wallet.utxos[t.sender].append(t.outputs[0])
-	#sender_wallet.utxos[t.recipient].append(t.outputs[1])
 	my_wallet.transactions.append(t)
-	
-	# send back 'sender.wallet.utxos'	
 	
 	return True
 
-
-
-
 class Node:
-
-	# FIVOS
-	# Only one node is running on each VM. Each node only has one wallet.
 
 	def __init__(self, address, chain, current_block=None, node_id=0, NBC=0, ring=[]):
 		##set
@@ -123,7 +87,7 @@ class Node:
 		self.current_block = current_block
 		self.block_ids = 1
 		self.difficulty = 2
-		self.jobs = []
+		#self.jobs = []
 
 	def set_id(self, myid):
 		self.id = myid
@@ -151,37 +115,26 @@ class Node:
 
 
 	def broadcast_transaction(self, my_transaction):
-		#print("In broadcast_transaction")
-		#print("SELF.RING: ##############")
-		#print(self.ring)
 		my_transaction_pickle = jsonpickle.encode(my_transaction)
 		my_wallet_pickle = jsonpickle.encode(self.wallet)
 		for dictionary in self.ring:
 			# Send the transaction to every ip in node.ring
-			#print("SENDING TO (FROM BROADCAST_TRANSACTION)")
-			#print(dictionary['ip'])
 			url = "http://" + dictionary['ip'] + ":5000/incoming_transaction"
-			#print("BROADCASTING TRANSACTION TO: ")
-			#print(url)
-			#print("WALLET IN BROADCAST BEFORE POST")
-			#print(self.wallet.utxos)
 			r = requests.post(url, data = {'transaction': my_transaction_pickle, 'wallet': my_wallet_pickle})
 			print(r)
 
 
 	def add_transaction_to_block(self, transaction):
-		#if enough transactions  mine, then create new block
-		#print("current block in add_trans_to_block")
-		#print(self.current_block)
 		capacity = self.current_block.capacity
-		#print(self.current_block.listOfTransactions)
-		print("I AM IN")
 		print("#########################################")
 		self.current_block.add_transaction(transaction)
 		if (self.check_capacity() == True):
 			return True
 		else:
-			self.filled_block_handler()
+			print("Block is ready for mining")
+			filled_block = self.current_block
+			self.current_block = self.create_new_block()
+			self.mine_handler(filled_block)
 			
 	def check_capacity(self):
 		if(len(self.current_block.listOfTransactions) == self.current_block.capacity):
@@ -201,23 +154,19 @@ class Node:
 		self.broadcast_block(filled_block)
 
 
-	def mine_handler(self, current_block, identifier):
-		lock = multiprocessing.Lock()
-		result_q = multiprocessing.Queue()
+	def mine_handler(self, current_block):
+		#lock = multiprocessing.Lock()
+		#result_q = multiprocessing.Queue()
 		#self.chain = multiprocessing.Value("blockchain.Blockchain",0)
-		p = multiprocessing.Process(name=str(identifier), target=self.mine_block, args=(current_block, result_q, identifier,lock))
-		print("The name of the job i will append is")
-		print(p.name)
-		self.jobs.append(p)
-		p.start()
-		print("Jobs list: ")
-		print(self.jobs)
-		print("Waiting to join ...")
-		p.join()
-		print("After join")	
-		print("Inside q in parent we have: ")
-		print(result_q.get())
-
+		#p = multiprocessing.Process(name=str(identifier), target=self.mine_block, args=(current_block, result_q, identifier,lock))
+		#print("The name of the job i will append is")
+		#print(p.name)
+		#self.jobs.append(p)
+		#p.start()
+		#print("Jobs list: ")
+		#print(self.jobs)
+		print("Inside mine handler")
+		self.mine_block(current_block)
 
 	def terminate_handler(self, myblock, identifier):
 		# Terminate mining process for given block
@@ -246,36 +195,33 @@ class Node:
 		
 			
 
-	def mine_block(self, my_block, result_q, identifier, lock):
-		lock.acquire()
+	def mine_block(self, my_block):
 		print("Starting mining on ")
 		print(str(self.address))
 		result_hash = self.proof_of_work(my_block)
 		print("Mining has returned (?) with result_hash: ")
 		print(result_hash)
 		# Send request to stop others from mining!
-		result_q.put(result_hash)
+		#result_q.put(result_hash)
 		#result_hash = self.proof_of_work(current_block)i
 		my_block.current_hash = result_hash
 		my_block.previousHash = self.chain.last_block().current_hash
-		self.broadcast_stop_mining_and_add_block(identifier, my_block)
-		lock.release()
+		#self.chain.add_block(my_block)
+		self.validate_block(my_block)
+		self.broadcast_block(my_block)
 		return(result_hash)
 		
 
 	def broadcast_block(self, myblock):
 		print("Broadcasting block to mine")
 		block_pickle = jsonpickle.encode(myblock)
-		identifier = random.randrange(0,1000000)
+		#identifier = random.randrange(0,1000000)
 		for entry in self.ring:
 			if entry['ip'] == str(self.address):
 				continue	
-			try:
-				print("Block: " + str(myblock) + " to: " + str(entry['ip']))
-				requests.post("http://" + entry['ip'] + ":5000/incoming_block_to_mine", data={'block': block_pickle, 'identifier': str(identifier)}, timeout=0.0001)
-			except requests.exceptions.ReadTimeout:
-				pass
-		requests.post("http://" + str(self.address) + ":5000/incoming_block_to_mine", data={'block': block_pickle, 'identifier': str(identifier)}, timeout=0.0001)
+			print("Block: " + str(myblock) + " to: " + str(entry['ip']))
+			requests.post("http://" + entry['ip'] + ":5000/incoming_block_to_mine", data={'block': block_pickle})
+		#requests.post("http://" + str(self.address) + ":5000/incoming_block_to_mine", data={'block': block_pickle}, timeout=0.0001)
 
 
 	def broadcast_stop_mining_and_add_block(self, identifier, myblock):
@@ -323,6 +269,7 @@ class Node:
 			if (self.chain.last_block().current_hash == myblock.previousHash):
 				print("correct prevhash!")
 				self.chain.add_block(myblock)
+				print(self.chain.print_chain())
 				return True
 			else:
 				print("Calling resolve conflicts")
