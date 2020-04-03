@@ -2,6 +2,7 @@ import requests
 import click
 import addresses
 from ip import get_my_ip
+import node
 
 @click.group()
 def cli():
@@ -32,17 +33,38 @@ def t(id, amount):
     print(type(my_ip))
     url = "http://" + my_ip + ":5000/send_money"
     r = requests.post(url, data={'ip': addresses.global_addresses[id], 'amount': amount})
-    print(r)
+    if r.status_code == 500:
+        print("Not enough money on wallet!")
+    else:
+        print("Thanks for using C O U S T E R I U M")
 
 @click.command()
 def balance():
     r = requests.get("http://" + get_my_ip() + ":5000/get_balance")
     print("Your wallet has " + r.text + " NBCs")
 
+@click.command()
+def view():
+    r = requests.get("http://" + get_my_ip() + ":5000/view_transactions")
+    print("Your block's transactions: ")
+    print(r.text)
+
+
 cli.add_command(balance)
 cli.add_command(hello)
 cli.add_command(connect)
 cli.add_command(t)
+cli.add_command(view)
 
 if __name__ == '__main__':
+  
+    print("  /$$$$$$                                  /$$                         /$$                        ")
+    print(" /$$__  $$                                | $$                        |__/                        ")
+    print("| $$  \__/  /$$$$$$  /$$   /$$  /$$$$$$$ /$$$$$$    /$$$$$$   /$$$$$$  /$$ /$$   /$$ /$$$$$$/$$$$ ")
+    print("| $$       /$$__  $$| $$  | $$ /$$_____/|_  $$_/   /$$__  $$ /$$__  $$| $$| $$  | $$| $$_  $$_  $$")
+    print("| $$      | $$  \ $$| $$  | $$|  $$$$$$   | $$    | $$$$$$$$| $$  \__/| $$| $$  | $$| $$ \ $$ \ $$")
+    print("| $$    $$| $$  | $$| $$  | $$ \____  $$  | $$ /$$| $$_____/| $$      | $$| $$  | $$| $$ | $$ | $$")
+    print("|  $$$$$$/|  $$$$$$/|  $$$$$$/ /$$$$$$$/  |  $$$$/|  $$$$$$$| $$      | $$|  $$$$$$/| $$ | $$ | $$")
+    print(" \______/  \______/  \______/ |_______/    \___/   \_______/|__/      |__/ \______/ |__/ |__/ |__/")
+
     cli()
