@@ -1,6 +1,5 @@
 from flask import Flask, jsonify, request, render_template
 
-import random
 import jsonpickle
 import block
 import node
@@ -35,13 +34,13 @@ def setup_bootstrap_node():
         raise Exception('genesis not added')
     myNode.address = MY_ADDRESS
     myNode.current_block = myNode.create_new_block(myNode.chain.last_block().current_hash)
-    #print("current_block")
-    #print(myNode.current_block)
+    print("current_block")
+    print(myNode.current_block)
 
-    #print("Chain: ")
-    #print(myNode.chain.last_block())
-    #print("Bootstrap node has: ")
-    #print(myNode.wallet.calculate_balance())
+    print("Chain: ")
+    print(myNode.chain.last_block())
+    print("Bootstrap node has: ")
+    print(myNode.wallet.calculate_balance())
     # Return the node
     return (myNode)
 
@@ -52,36 +51,36 @@ def create_regular_node():
     myNode.address = MY_ADDRESS
 
     r = requests.get("http://" + SERVER_ADDRESS + ":5000/get_bootstrap_utxo")
-    #print(r.text)
+    print(r.text)
     my_utxos = jsonpickle.decode(r.text)
-    #print(type(my_utxos))
+    print(type(my_utxos))
     
-    #print("BEFORE:")
-    #print(myNode.wallet.utxos)
+    print("BEFORE:")
+    print(myNode.wallet.utxos)
 
     for key in my_utxos.keys():
         if key not in myNode.wallet.utxos.keys():
             myNode.wallet.utxos[key] = my_utxos[key]
             #myNode.wallet.utxos = my_utxos.copy()
     
-    #print("AFTER")
-    #print(myNode.wallet.utxos)
+    print("AFTER")
+    print(myNode.wallet.utxos)
 
     myNode.current_block = myNode.create_new_block()
  
-    #print("I RETURN: ")
-    #print((myNode is None))
+    print("I RETURN: ")
+    print((myNode is None))
     return(myNode)
     
 def setup():
     # Our node sends it's publik key (= wallet address = MY_ADDRESS ? )
     # and receives a unique id (0..NETWORK_SIZE) 
-    #print('http://' + SERVER_ADDRESS + ':5000/add_to_ring')
+    print('http://' + SERVER_ADDRESS + ':5000/add_to_ring')
     r = requests.post('http://' + SERVER_ADDRESS + ':5000/add_to_ring', data = {'public_key':MY_NODE.wallet.get_public_key()})
-    #print("The answer from the server is: \nr: ")
-    #print(r)
-    #print("\nr.text ")
-    #print(r.text)
+    print("The answer from the server is: \nr: ")
+    print(r)
+    print("\nr.text ")
+    print(r.text)
     # Set node id to the id you got on the response
     MY_NODE.set_id(r.text)
     #print("MY_NODE IS: ", myNode)
@@ -93,13 +92,13 @@ def setup():
 #to all the nodes, when every node joins the system.
 # This is only run from the bootstrap node
 def broadcast_info():
-    #print("RING: ")
-    #print(MY_NODE.ring)
+    print("RING: ")
+    print(MY_NODE.ring)
     #print("BROADCASTING TO: " +  "http://" + data_line['ip'] + ":5000/test")
     ring_pickle = jsonpickle.encode(MY_NODE.ring)
     blockchain_pickle = jsonpickle.encode(MY_NODE.chain)
     for entry in MY_NODE.ring:
-        #print("TO: ", "http://" + entry['ip'] + ":5000/add_to_client_ring")
+        print("TO: ", "http://" + entry['ip'] + ":5000/add_to_client_ring")
         # TODO: ** Maybe we have to jsonpickle? **
         r = requests.post("http://" + entry['ip'] + ":5000/add_to_client_ring", data={'ring':ring_pickle, 'blockchain': blockchain_pickle})
         
@@ -142,10 +141,10 @@ def add_to_client_ring():
     new_blockchain = jsonpickle.decode(incoming_blockchain)
     
     MY_NODE.ring = new_ring
-    #print("Node with id ")
-    #print(MY_NODE.id)
-    #print(" has new ring: ")
-    #print(MY_NODE.ring)
+    print("Node with id ")
+    print(MY_NODE.id)
+    print(" has new ring: ")
+    print(MY_NODE.ring)
 
     print("CHAINZ BEFORE:")
     print(MY_NODE.chain.print_chain())
@@ -155,8 +154,8 @@ def add_to_client_ring():
     print(MY_NODE.chain.print_chain())
     
     #MY_NODE.wallet.utxos[request.form.to_dict()['public_key']] = []
-    #print("The node's utxos")
-    #print(MY_NODE.wallet.utxos)
+    print("The node's utxos")
+    print(MY_NODE.wallet.utxos)
     return("OK!")
 
 
@@ -179,30 +178,29 @@ def incoming_transaction():
     pickle_wallet = request.form.to_dict()['wallet']
     my_transaction = jsonpickle.decode(pickle_transaction)
     incoming_wallet = jsonpickle.decode(pickle_wallet)
-    #print("WALLET BEFORE")
-    #print("WHO AM I???")
-    #print(get_my_ip())
-    #print(MY_NODE.wallet.utxos)
+    print("WALLET BEFORE")
+    print("WHO AM I???")
+    print(get_my_ip())
+    print(MY_NODE.wallet.utxos)
     if (node.validate_transaction(incoming_wallet, my_transaction, MY_NODE.wallet)):
         # Update the sender utxos
         # IF validated add transaction to block
-        #print(my_transaction)
+        print(my_transaction)
         MY_NODE.add_transaction_to_block(my_transaction)
-        #print(MY_NODE.current_block)
+        print(MY_NODE.current_block)
 
-    #print("WALLET AFTER")
-    #print(MY_NODE.wallet.utxos)
+    print("WALLET AFTER")
+    print(MY_NODE.wallet.utxos)
     
     return("OK")
 
 
-@app.route('/incoming_block_to_mine', methods=['POST'])
-# A block is coming, start mining!
+@app.route('/incoming_block', methods=['POST'])
 def incoming_block():
     new_block = jsonpickle.decode(request.form.to_dict()['block'])
-    identifier = request.form.to_dict()['identifier'] 
-    MY_NODE.mine_handler(new_block, identifier)
-    return("Return of /incoming_block_to_mine route")
+    MY_NODE.validate_block(new_block)
+    MY_NODE.chain.print_chain()
+    return("Block Added!")
 
 
 @app.route('/send_money', methods=['POST'])
@@ -233,23 +231,23 @@ def add_to_ring():
     MY_NODE.ring.append({'id': next_id, 'ip':request.remote_addr, 'public_key':request.form.to_dict()['public_key']})
     
     ### GIVE HIM 100 NBC ###
-    #print("Bootstrap WALLET BEFORE CREATE FIRST TRANSACTION: ")
-    #print(MY_NODE.wallet.utxos)
+    print("Bootstrap WALLET BEFORE CREATE FIRST TRANSACTION: ")
+    print(MY_NODE.wallet.utxos)
     first_transaction = transaction.create_transaction(MY_NODE.wallet, request.form.to_dict()['public_key'], 100)
     
-    #print("Bootstrap WALLET AFTER FIRST TRANSACTION: ")
-    #print(MY_NODE.wallet.utxos)
-    #print("Pickle'ing the first_transaction object")
+    print("Bootstrap WALLET AFTER FIRST TRANSACTION: ")
+    print(MY_NODE.wallet.utxos)
+    print("Pickle'ing the first_transaction object")
     transaction_pickle = jsonpickle.encode(first_transaction)
-    #print(transaction_pickle)
+    print(transaction_pickle)
 
-    #print("Pickle'ing the wallet")
+    print("Pickle'ing the wallet")
     wallet_pickle = jsonpickle.encode(MY_NODE.wallet)
 
 
     # remote_addr is getting the same transaction twice!(?)
-    #print("Sending transaction to: ")
-    #print("http://" + request.remote_addr + ":5000/incoming_transaction")
+    print("Sending transaction to: ")
+    print("http://" + request.remote_addr + ":5000/incoming_transaction")
     #r = requests.post("http://" + request.remote_addr + ":5000/incoming_transaction", data={'transaction': transaction_pickle, 'wallet': wallet_pickle})
     #print("Returned with answer: ")
     #print(r)
@@ -270,11 +268,11 @@ def get_balance():
     print(type(result))
     return(str(result))
 
-#@app.route('/start_mining', methods=['GET', 'POST'])
-#def start_mining():
-#    incoming_block = jsonpickle.decode(request.form.to_dict()['block'])
-#    result_hash = MY_NODE.mine_block(incoming_block)
-#    return(str(result_hash))
+@app.route('/start_mining', methods=['GET', 'POST'])
+def start_mining():
+    incoming_block = jsonpickle.decode(request.form.to_dict()['block'])
+    result_hash = MY_NODE.mine_block(incoming_block)
+    return(str(result_hash))
 
 @app.route('/send_blockchain', methods=['GET'])
 def send_blockchain():
@@ -298,5 +296,5 @@ if __name__ == '__main__':
     args = parser.parse_args()
     port = args.port
     print("Serving at: ", MY_ADDRESS)
-    app.run(host=MY_ADDRESS, port=port, threaded=True)
+    app.run(host=MY_ADDRESS, port=port)
 
